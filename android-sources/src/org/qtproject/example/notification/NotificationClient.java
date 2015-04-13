@@ -47,39 +47,21 @@ import android.widget.Toast;
 
 public class NotificationClient extends org.qtproject.qt5.android.bindings.QtActivity
 {
-    private static NotificationManager m_notificationManager;
-    private static Notification.Builder m_builder;
     private static NotificationClient m_instance;
 
-    private static native void callNativeFunction(int x);
+//    private static native void callNativeFunction(int x);
 
     public NotificationClient()
     {
         m_instance = this;
     }
 
-//    public static void notify(String s)
-//    {
-//        if (m_notificationManager == null) {
-//            m_notificationManager = (NotificationManager)m_instance.getSystemService(Context.NOTIFICATION_SERVICE);
-//            m_builder = new Notification.Builder(m_instance);
-//            m_builder.setSmallIcon(R.drawable.icon);
-//            m_builder.setContentTitle("A message from Qt!");
-//        }
-
-//        m_builder.setContentText(s);
-//        m_notificationManager.notify(1, m_builder.build());
-//    }
-
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private static String[] devicesFound = new String[20];
     private static String[] sendList;
 
-
     int deviceNumber = 0;
     static int nrOfDevices = 0;
-
-
 
     private static boolean searching = true;
 
@@ -97,12 +79,15 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                         //bluetooth device found
                         BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                         System.out.println("Found a device");
-//                        btArrayAdapter.add(device.getName() + "\n"+device.getAddress());
-//                        btArrayAdapter.notifyDataSetChanged();
-//                        devicesFound[deviceNumber] = device.getName();
-//                        deviceNumber++;
-//                        nrOfDevices++;
-                        devicesFound[0] = device.getName();
+                        if(device.getName() == "null") {
+                            devicesFound[deviceNumber] = device.getAddress();
+                        } else {
+                            devicesFound[deviceNumber] = device.getName();
+                        }
+
+                        deviceNumber++;
+                        nrOfDevices++;
+//                        devicesFound[0] = device.getName();
                     }
                 }
             };
@@ -125,7 +110,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     public static String[] scanReturn() {
         m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-//            btArrayAdapter.clear();
             IntentFilter filter = new IntentFilter();
             m_instance.bluetoothAdapter.startDiscovery();
 
@@ -133,25 +117,29 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
-            devicesFound[0] = "Hello!";
+//            devicesFound[0] = "Hello!";
 
             m_instance.registerReceiver(m_instance.mReceiver, filter);
-
-
 
             while(searching);
             searching = true;
 
-//            if(nrOfDevices > 0){
-//                sendList = new String[nrOfDevices];
-//                sendList = devicesFound;
-//            } else {
-//                sendList = new String[1];
-//                sendList[0] = "no devices";
-//            }
+            if(nrOfDevices > 0){
+                sendList = new String[nrOfDevices];
+                System.out.println("nrOfDevices: " + nrOfDevices);
+                for(int i=0;i<nrOfDevices;i++) {
+                    System.out.println("Device name: "+devicesFound[i]);
+                    sendList[i] = devicesFound[i];
+                }
 
+                System.out.println("Device 0: " + sendList[0]);
+            } else {
+                sendList = new String[1];
+                sendList[0] = "no devices";
+            }
 
-            return devicesFound;
+            return sendList;
+//            return devicesFound;
     }
 
     public static void btON() {
@@ -168,12 +156,12 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 //             m_instance.bluetoothAdapter.disable();
 //         }
 
-        callNativeFunction(3);
+//        callNativeFunction(3);
 
 
     }
     public static void btOFF() {
-        System.out.println("pung");
+        System.out.println("Bluetooth off");
         m_instance.bluetoothAdapter.disable();
     }
 
