@@ -60,7 +60,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static String[] devicesFound = new String[20];
     private static String[] sendList;
 
-    int deviceNumber = 0;
+    static int deviceNumber = 0;
     static int nrOfDevices = 0;
 
     private static boolean searching = true;
@@ -137,7 +137,8 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 sendList = new String[1];
                 sendList[0] = "no devices";
             }
-
+            nrOfDevices = 0;
+            deviceNumber = 0;
             return sendList;
 //            return devicesFound;
     }

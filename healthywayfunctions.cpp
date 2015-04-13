@@ -40,6 +40,7 @@ void HealthyWayFunctions::scanButtonClicked()
 
     QAndroidJniEnvironment env;
 
+    QStringList list;
 
     int size = env->GetArrayLength(arr);
 //    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
@@ -55,8 +56,8 @@ void HealthyWayFunctions::scanButtonClicked()
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
         list.append(formatted);
-//        env->ReleaseStringUTFChars(string, formatted);
-//        env->DeleteLocalRef(string);
+        env->ReleaseStringUTFChars(string, formatted);
+        env->DeleteLocalRef(string);
     }
 
     qDebug() << size;

@@ -124,7 +124,7 @@ ApplicationWindow {
                 MouseArea {
                     id: bluetoothDevices
                     anchors.fill: parent
-
+                    onClicked: generator.deviceClicked();
                 }
             }
         }
