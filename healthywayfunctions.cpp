@@ -10,18 +10,21 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 
 void HealthyWayFunctions::onButtonClicked()
 {
+    qDebug() << "bluetooth on";
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "btON");
 }
 
 void HealthyWayFunctions::offButtonClicked()
 {
+    qDebug() << "bluetooth off";
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "btOFF");
 }
 
 void HealthyWayFunctions::scanButtonClicked()
 {
+    qDebug() << "Scan start";
     //    QStringList list;
     //    list.append("Done");
 
@@ -30,6 +33,8 @@ void HealthyWayFunctions::scanButtonClicked()
     QAndroidJniObject stringArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
                                                                               "scanReturn",
                                                                               "()[Ljava/lang/String;");
+    qDebug() << "Scan stopped";
+
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
@@ -65,5 +70,26 @@ void HealthyWayFunctions::scanButtonClicked()
     env->ReleaseStringUTFChars(string, formatted);
 
     m_model->setStringList(list);
+}
+
+static void fromJavaCode(JNIEnv *env, jobject thiz, jint x) {
+    Q_UNUSED(env)
+    Q_UNUSED(thiz)
+    qDebug() << "From java code: " << x;
+}
+
+void registerNativeMethods() {
+    qDebug() << "Sup?";
+    JNINativeMethod methods[] = {{"callNativeFunction", "(I)V", reinterpret_cast<void *>(fromJavaCode)}};
+
+    QAndroidJniObject javaClass("org/qtproject/example/notification/NotificationClient");
+
+    QAndroidJniEnvironment env;
+
+    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
+
+    env->RegisterNatives(objectClass, methods, sizeof(methods)/sizeof(methods[0]));
+
+    env->DeleteLocalRef(objectClass);
 }
 

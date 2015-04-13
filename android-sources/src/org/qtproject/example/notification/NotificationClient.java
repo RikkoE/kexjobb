@@ -51,31 +51,30 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static Notification.Builder m_builder;
     private static NotificationClient m_instance;
 
-
+    private static native void callNativeFunction(int x);
 
     public NotificationClient()
     {
         m_instance = this;
     }
 
-    public static void notify(String s)
-    {
-        if (m_notificationManager == null) {
-            m_notificationManager = (NotificationManager)m_instance.getSystemService(Context.NOTIFICATION_SERVICE);
-            m_builder = new Notification.Builder(m_instance);
-            m_builder.setSmallIcon(R.drawable.icon);
-            m_builder.setContentTitle("A message from Qt!");
-        }
+//    public static void notify(String s)
+//    {
+//        if (m_notificationManager == null) {
+//            m_notificationManager = (NotificationManager)m_instance.getSystemService(Context.NOTIFICATION_SERVICE);
+//            m_builder = new Notification.Builder(m_instance);
+//            m_builder.setSmallIcon(R.drawable.icon);
+//            m_builder.setContentTitle("A message from Qt!");
+//        }
 
-        m_builder.setContentText(s);
-        m_notificationManager.notify(1, m_builder.build());
-    }
+//        m_builder.setContentText(s);
+//        m_notificationManager.notify(1, m_builder.build());
+//    }
 
-    ArrayAdapter<String> btArrayAdapter;
-    private BluetoothAdapter bluetoothAdapter;
-//    btArrayAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1);
+    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private static String[] devicesFound = new String[20];
     private static String[] sendList;
+
 
     int deviceNumber = 0;
     static int nrOfDevices = 0;
@@ -97,8 +96,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                     } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                         //bluetooth device found
                         BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                        Toast.makeText(getApplicationContext(),"Found device " + device.getName() +"\n" +device.getAddress(),Toast.LENGTH_LONG).show();
+                        System.out.println("Found a device");
 //                        btArrayAdapter.add(device.getName() + "\n"+device.getAddress());
 //                        btArrayAdapter.notifyDataSetChanged();
 //                        devicesFound[deviceNumber] = device.getName();
@@ -157,16 +155,27 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     }
 
     public static void btON() {
-        m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        System.out.println("asdf");
+        System.out.println(m_instance.bluetoothAdapter.isEnabled());
         if (!m_instance.bluetoothAdapter.isEnabled()) {
-             m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
-             Toast.makeText(m_instance.getApplicationContext(), "Turning on Bluetooth", Toast.LENGTH_LONG).show();
-        }
+            System.out.println("bluetooth is turned off");
+//             m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
+            m_instance.bluetoothAdapter.enable();
+         }
+//         else {
+//             System.out.println("turning off bluetooth!!");
+//             m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//             m_instance.bluetoothAdapter.disable();
+//         }
+
+        callNativeFunction(3);
+
+
     }
     public static void btOFF() {
-        m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        System.out.println("pung");
         m_instance.bluetoothAdapter.disable();
-        Toast.makeText(m_instance.getApplicationContext(),"Turning off Bluetooth", Toast.LENGTH_LONG);
     }
+
 
 }
