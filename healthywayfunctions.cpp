@@ -24,8 +24,10 @@ void HealthyWayFunctions::offButtonClicked()
 
 void HealthyWayFunctions::scanButtonClicked()
 {
+
     qDebug() << "Scan start";
-    //    QStringList list;
+    QStringList list;
+
     //    list.append("Done");
 
     //    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
@@ -38,58 +40,52 @@ void HealthyWayFunctions::scanButtonClicked()
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
-    //    env->GetObjectArrayElement(arr,size);
 
-    QStringList list;
 
     int size = env->GetArrayLength(arr);
-    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
+//    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
 
-    int strlen = env->GetStringLength(string);
-    //    if(strlen > 0) {
-    const char *formatted = env->GetStringUTFChars(string, 0);
-    list.append(formatted);
+//    const char *formatted = env->GetStringUTFChars(string, 0);
+//    list.append(formatted);
 
-    //    }
+    jstring string;
+    const char *formatted;
 
-    //    for (int i=0; i < size; ++i)
-    //    {
-    //        jstring string = env->GetObjectArrayElement(arr, i);
-    //        result[i] = env->GetStringUTFChars(string, i);
-    //        env->ReleaseStringUTFChars(string, arr);
-    //        env->DeleteLocalRef(string);
-    //    }
+    for (int i=0; i < size; i++)
+    {
+        string = (jstring)env->GetObjectArrayElement(arr, i);
+        formatted = env->GetStringUTFChars(string, 0);
+        list.append(formatted);
+//        env->ReleaseStringUTFChars(string, formatted);
+//        env->DeleteLocalRef(string);
+    }
 
-
-    //    QString str = stringArray.toString();
     qDebug() << size;
     qDebug() << string;
-    qDebug() << strlen;
     qDebug() << list;
     qDebug() << formatted;
-    env->ReleaseStringUTFChars(string, formatted);
+//    env->ReleaseStringUTFChars(string, formatted);
 
     m_model->setStringList(list);
 }
 
-static void fromJavaCode(JNIEnv *env, jobject thiz, jint x) {
-    Q_UNUSED(env)
-    Q_UNUSED(thiz)
-    qDebug() << "From java code: " << x;
-}
+//static void fromJavaCode(JNIEnv *env, jobject thiz, jint x) {
+//    Q_UNUSED(env)
+//    Q_UNUSED(thiz)
+//    qDebug() << "From java code: " << x;
+//}
 
-void registerNativeMethods() {
-    qDebug() << "Sup?";
-    JNINativeMethod methods[] = {{"callNativeFunction", "(I)V", reinterpret_cast<void *>(fromJavaCode)}};
+//void registerNativeMethods() {
+//    qDebug() << "Sup?";
+//    JNINativeMethod methods[] = {{"callNativeFunction", "(I)V", reinterpret_cast<void *>(fromJavaCode)}};
 
-    QAndroidJniObject javaClass("org/qtproject/example/notification/NotificationClient");
+//    QAndroidJniObject javaClass("org/qtproject/example/notification/NotificationClient");
 
-    QAndroidJniEnvironment env;
+//    QAndroidJniEnvironment env;
 
-    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
+//    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
 
-    env->RegisterNatives(objectClass, methods, sizeof(methods)/sizeof(methods[0]));
+//    env->RegisterNatives(objectClass, methods, sizeof(methods)/sizeof(methods[0]));
 
-    env->DeleteLocalRef(objectClass);
-}
-
+//    env->DeleteLocalRef(objectClass);
+//}

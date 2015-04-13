@@ -70,6 +70,21 @@ ApplicationWindow {
             }
         }
 
+        Item {
+                /* use id for access */
+                id: statusView
+                x: 0
+                y: 50
+                width: 640
+                height: 430
+                /* visible: true */
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "status"
+                }
+            }
+
         Rectangle {
             id: scanButton
             anchors {
@@ -118,6 +133,13 @@ ApplicationWindow {
                 Text {
                     text: display
                 }
+            }
+            MouseArea{
+                    id: listMouseArea
+                    anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+                            //onClicked handles valid mouse button clicks
+                    onClicked:{ statusView.visible = true
+                    }
             }
         }
     }
