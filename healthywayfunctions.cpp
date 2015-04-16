@@ -24,10 +24,8 @@ void HealthyWayFunctions::offButtonClicked()
 
 void HealthyWayFunctions::scanButtonClicked()
 {
-
     qDebug() << "Scan start";
-    QStringList list;
-
+    //    QStringList list;
     //    list.append("Done");
 
     //    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
@@ -40,7 +38,9 @@ void HealthyWayFunctions::scanButtonClicked()
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
+    //    env->GetObjectArrayElement(arr,size);
 
+    QStringList list;
 
     int size = env->GetArrayLength(arr);
 //    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
@@ -56,12 +56,15 @@ void HealthyWayFunctions::scanButtonClicked()
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
         list.append(formatted);
-//        env->ReleaseStringUTFChars(string, formatted);
-//        env->DeleteLocalRef(string);
+        env->ReleaseStringUTFChars(string, formatted);
+        env->DeleteLocalRef(string);
     }
 
+
+    //    QString str = stringArray.toString();
     qDebug() << size;
     qDebug() << string;
+    qDebug() << strlen;
     qDebug() << list;
     qDebug() << formatted;
 //    env->ReleaseStringUTFChars(string, formatted);
@@ -89,3 +92,4 @@ void HealthyWayFunctions::scanButtonClicked()
 
 //    env->DeleteLocalRef(objectClass);
 //}
+
