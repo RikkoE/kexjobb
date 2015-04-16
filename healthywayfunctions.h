@@ -18,6 +18,7 @@ public:
     Q_INVOKABLE void scanButtonClicked();
     Q_INVOKABLE void offButtonClicked();
     Q_INVOKABLE void onButtonClicked();
+    Q_INVOKABLE void scanLeDevice();
 
 public slots:
     // This method needs to take either a QString or a const reference to one.

@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.2
 ApplicationWindow {
     title: qsTr("HealthyWay")
     visible: true
-
+    Loader {id: pageLoader}
     Item {
         anchors.fill: parent
 
@@ -70,20 +70,10 @@ ApplicationWindow {
             }
         }
 
-        Item {
-                /* use id for access */
-                id: statusView
-                x: 0
-                y: 50
-                width: 640
-                height: 430
-                /* visible: true */
+        Connections {
+            target: MyObject
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "status"
-                }
-            }
+        }
 
         Rectangle {
             id: scanButton
@@ -110,11 +100,27 @@ ApplicationWindow {
                 id: scanMouseArea
                 anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
                 //onClicked handles valid mouse button clicks
-                onClicked: generator.scanButtonClicked();
+                onClicked: generator.scanLeDevice()
             }
         }
 
+        //        Item {
+        //            id: testView
+        //            visible: false
+        //            x:0
+        //            y:50
+        //            width: 640
+        //            height: 430
+        MessageDialog {
+            id: connectMsg
+            title: "Would you like to connect to this device?"
+            onAccepted:
+                Qt.quit()
+        }
+
+
         ListView {
+            property variant win;
             id: blueList
             model: devicesModel
             width: scanButton.width
@@ -128,7 +134,7 @@ ApplicationWindow {
             }
             spacing: 40
             delegate: Rectangle  {
-//                anchors.topMargin: 40
+                //                anchors.topMargin: 40
                 height: parent.parent.height*0.2
                 width: parent.width
                 border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
@@ -139,15 +145,11 @@ ApplicationWindow {
                 MouseArea {
                     id: bluetoothDevices
                     anchors.fill: parent
+                    onClicked: {
+                        connectMsg.visible = true
 
-                }
-            }
-            MouseArea{
-                    id: listMouseArea
-                    anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-                            //onClicked handles valid mouse button clicks
-                    onClicked:{ statusView.visible = true
                     }
+                }
             }
         }
     }

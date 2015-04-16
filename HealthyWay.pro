@@ -22,6 +22,7 @@ HEADERS += \
 
 OTHER_FILES += \
     android-sources/src/org/qtproject/example/notification/NotificationClient.java \
-    android-sources/AndroidManifest.xml
+    android-sources/AndroidManifest.xml \
+    listResources.qml
 
 DISTFILES +=

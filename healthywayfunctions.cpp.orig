@@ -15,13 +15,6 @@ void HealthyWayFunctions::onButtonClicked()
                                               "btON");
 }
 
-void HealthyWayFunctions::scanLeDevice()
-{
-
-    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
-                                       "scan");
-}
-
 void HealthyWayFunctions::offButtonClicked()
 {
     qDebug() << "bluetooth off";
@@ -29,17 +22,16 @@ void HealthyWayFunctions::offButtonClicked()
                                               "btOFF");
 }
 
-void HealthyWayFunctions::myObject() {
-
-}
-
-
 void HealthyWayFunctions::scanButtonClicked()
 {
+
     qDebug() << "Scan start";
-    //    QStringList list;
+    QStringList list;
+
     //    list.append("Done");
 
+    //    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+    //                                       "scan");
     QAndroidJniObject stringArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
                                                                               "scanReturn",
                                                                               "()[Ljava/lang/String;");
@@ -48,9 +40,7 @@ void HealthyWayFunctions::scanButtonClicked()
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
-    //    env->GetObjectArrayElement(arr,size);
 
-    QStringList list;
 
     int size = env->GetArrayLength(arr);
 //    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
@@ -66,15 +56,17 @@ void HealthyWayFunctions::scanButtonClicked()
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
         list.append(formatted);
+<<<<<<< HEAD
+//        env->ReleaseStringUTFChars(string, formatted);
+//        env->DeleteLocalRef(string);
+=======
         env->ReleaseStringUTFChars(string, formatted);
         env->DeleteLocalRef(string);
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
     }
 
-
-    //    QString str = stringArray.toString();
     qDebug() << size;
     qDebug() << string;
-    qDebug() << strlen;
     qDebug() << list;
     qDebug() << formatted;
 //    env->ReleaseStringUTFChars(string, formatted);
@@ -87,6 +79,20 @@ void HealthyWayFunctions::scanButtonClicked()
 //    Q_UNUSED(thiz)
 //    qDebug() << "From java code: " << x;
 //}
+<<<<<<< HEAD
+
+//void registerNativeMethods() {
+//    qDebug() << "Sup?";
+//    JNINativeMethod methods[] = {{"callNativeFunction", "(I)V", reinterpret_cast<void *>(fromJavaCode)}};
+
+//    QAndroidJniObject javaClass("org/qtproject/example/notification/NotificationClient");
+
+//    QAndroidJniEnvironment env;
+
+//    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
+
+//    env->RegisterNatives(objectClass, methods, sizeof(methods)/sizeof(methods[0]));
+=======
 
 //void registerNativeMethods() {
 //    qDebug() << "Sup?";
@@ -102,4 +108,7 @@ void HealthyWayFunctions::scanButtonClicked()
 
 //    env->DeleteLocalRef(objectClass);
 //}
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
 
+//    env->DeleteLocalRef(objectClass);
+//}

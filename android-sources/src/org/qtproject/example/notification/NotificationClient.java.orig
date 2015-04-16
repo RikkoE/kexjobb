@@ -47,41 +47,56 @@ import android.widget.Toast;
 
 public class NotificationClient extends org.qtproject.qt5.android.bindings.QtActivity
 {
-    private static NotificationManager m_notificationManager;
-    private static Notification.Builder m_builder;
     private static NotificationClient m_instance;
 
+//    private static native void callNativeFunction(int x);
 
     public NotificationClient()
     {
-        m_instance = this;
+	m_instance = this;
     }
-
-//    public static void notify(String s)
-//    {
-//        if (m_notificationManager == null) {
-//            m_notificationManager = (NotificationManager)m_instance.getSystemService(Context.NOTIFICATION_SERVICE);
-//            m_builder = new Notification.Builder(m_instance);
-//            m_builder.setSmallIcon(R.drawable.icon);
-//            m_builder.setContentTitle("A message from Qt!");
-//        }
-
-//        m_builder.setContentText(s);
-//        m_notificationManager.notify(1, m_builder.build());
-//    }
 
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private static String[] devicesFound = new String[20];
     private static String[] sendList;
 
+<<<<<<< HEAD
+    int deviceNumber = 0;
+=======
     static int deviceNumber = 0;
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
     static int nrOfDevices = 0;
-
-
 
     private static boolean searching = true;
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
+<<<<<<< HEAD
+		public void onReceive(Context context, Intent intent) {
+		    String action = intent.getAction();
+
+		    if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+			searching = true;
+			//discovery starts, we can show progress dialog or perform other tasks
+		    } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+			searching = false;
+			//discovery finishes, dismiss progress dialog
+		    } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+			//bluetooth device found
+			BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+			System.out.println("Found a device");
+			if(device.getName() == "null") {
+			    devicesFound[deviceNumber] = device.getAddress();
+			} else {
+			    devicesFound[deviceNumber] = device.getName();
+			}
+
+			deviceNumber++;
+			nrOfDevices++;
+//                        devicesFound[0] = device.getName();
+		    }
+		}
+	    };
+=======
                 public void onReceive(Context context, Intent intent) {
                     String action = intent.getAction();
 
@@ -107,39 +122,30 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                     }
                 }
             };
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
 
     public static void scan() {
-        m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 //            btArrayAdapter.clear();
-            IntentFilter filter = new IntentFilter();
-//            m_instance.bluetoothAdapter.startDiscovery();
-	    System.out.println("Scan started: "+m_instance.bluetoothAdapter.startLeScan(mLeScanCallback));
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+	    IntentFilter filter = new IntentFilter();
+	    m_instance.bluetoothAdapter.startDiscovery();
 
-            m_instance.registerReceiver(m_instance.mReceiver, filter);
+	    filter.addAction(BluetoothDevice.ACTION_FOUND);
+	    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+	    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+	    m_instance.registerReceiver(m_instance.mReceiver, filter);
 
     }
 
-// Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-	    new BluetoothAdapter.LeScanCallback() {
-
-	@Override
-	public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-	    runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-		    mLeDeviceListAdapter.addDevice(device);
-		    mLeDeviceListAdapter.notifyDataSetChanged();
-		}
-	    });
-	}
-    };
-
     public static String[] scanReturn() {
+<<<<<<< HEAD
+	m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+	    IntentFilter filter = new IntentFilter();
+	    m_instance.bluetoothAdapter.startDiscovery();
+=======
         m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
             IntentFilter filter = new IntentFilter();
@@ -150,11 +156,36 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
 //            devicesFound[0] = "Hello!";
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
 
-            m_instance.registerReceiver(m_instance.mReceiver, filter);
+	    filter.addAction(BluetoothDevice.ACTION_FOUND);
+	    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+	    filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
+<<<<<<< HEAD
+//            devicesFound[0] = "Hello!";
 
+	    m_instance.registerReceiver(m_instance.mReceiver, filter);
 
+	    while(searching);
+	    searching = true;
+
+	    if(nrOfDevices > 0){
+		sendList = new String[nrOfDevices];
+		System.out.println("nrOfDevices: " + nrOfDevices);
+		for(int i=0;i<nrOfDevices;i++) {
+		    System.out.println("Device name: "+devicesFound[i]);
+		    sendList[i] = devicesFound[i];
+		}
+
+		System.out.println("Device 0: " + sendList[0]);
+	    } else {
+		sendList = new String[1];
+		sendList[0] = "no devices";
+	    }
+
+	    return sendList;
+=======
             while(searching);
             searching = true;
 
@@ -174,29 +205,36 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             nrOfDevices = 0;
             deviceNumber = 0;
             return sendList;
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
 //            return devicesFound;
     }
 
     public static void btON() {
-        System.out.println("asdf");
-        System.out.println(m_instance.bluetoothAdapter.isEnabled());
-        if (!m_instance.bluetoothAdapter.isEnabled()) {
-            System.out.println("bluetooth is turned off");
+	System.out.println("asdf");
+	System.out.println(m_instance.bluetoothAdapter.isEnabled());
+	if (!m_instance.bluetoothAdapter.isEnabled()) {
+	    System.out.println("bluetooth is turned off");
 //             m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
-            m_instance.bluetoothAdapter.enable();
-         }
+	    m_instance.bluetoothAdapter.enable();
+	 }
 //         else {
 //             System.out.println("turning off bluetooth!!");
 //             m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 //             m_instance.bluetoothAdapter.disable();
 //         }
 
+//        callNativeFunction(3);
 
 
     }
     public static void btOFF() {
+<<<<<<< HEAD
+	System.out.println("Bluetooth off");
+	m_instance.bluetoothAdapter.disable();
+=======
         System.out.println("Bluetooth off");
         m_instance.bluetoothAdapter.disable();
+>>>>>>> 759065fca443e8ce4bacd7775e226fce14f10979
     }
 
 
