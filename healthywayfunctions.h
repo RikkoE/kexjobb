@@ -9,6 +9,7 @@ class HealthyWayFunctions : public QObject
 {
     Q_OBJECT
     QStringListModel * m_model;
+    QStringList m_list;
 
 public:
     // QObjects are expected to support a parent/child hierarchy.  I've modified
@@ -18,6 +19,9 @@ public:
     Q_INVOKABLE void scanButtonClicked();
     Q_INVOKABLE void offButtonClicked();
     Q_INVOKABLE void onButtonClicked();
+    Q_INVOKABLE void deviceClicked(const int &deviceIndex);
+    Q_INVOKABLE void scanLeDevices();
+    Q_INVOKABLE int updateButtonClicked();
 
 public slots:
     // This method needs to take either a QString or a const reference to one.

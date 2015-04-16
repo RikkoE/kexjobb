@@ -8,6 +8,33 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 {
 }
 
+void HealthyWayFunctions::deviceClicked(const int &deviceIndex)
+{
+    qDebug() << "Chosen device: " << m_list.at(deviceIndex);
+ /*   QAndroidJniObject deviceString = QAndroidJniObject::fromString(m_list.at(deviceIndex));
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+                                              "connectDevice",
+                                              "(Ljava/lang/String;)",
+                                              deviceString.object<jstring>());*/
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+                                              "connectDevice");
+
+}
+
+void HealthyWayFunctions::scanLeDevices()
+{
+
+}
+
+int HealthyWayFunctions::updateButtonClicked()
+{
+    qDebug() << "Updating heart rate!";
+    jint heart = QAndroidJniObject::callStaticMethod<jint>("org/qtproject/example/notification/NotificationClient",
+                                              "updateHeartRate");
+    qDebug() << "Heart rate: " << heart;
+    return heart;
+}
+
 void HealthyWayFunctions::onButtonClicked()
 {
     qDebug() << "bluetooth on";
@@ -24,7 +51,7 @@ void HealthyWayFunctions::offButtonClicked()
 
 void HealthyWayFunctions::scanButtonClicked()
 {
-
+    m_list.clear();
     qDebug() << "Scan start";
     //    QStringList list;
     //    list.append("Done");
@@ -40,13 +67,7 @@ void HealthyWayFunctions::scanButtonClicked()
 
     QAndroidJniEnvironment env;
 
-    QStringList list;
-
     int size = env->GetArrayLength(arr);
-//    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
-
-//    const char *formatted = env->GetStringUTFChars(string, 0);
-//    list.append(formatted);
 
     jstring string;
     const char *formatted;
@@ -55,18 +76,17 @@ void HealthyWayFunctions::scanButtonClicked()
     {
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
-        list.append(formatted);
+        m_list.append(formatted);
         env->ReleaseStringUTFChars(string, formatted);
         env->DeleteLocalRef(string);
     }
 
     qDebug() << size;
     qDebug() << string;
-    qDebug() << list;
+    qDebug() << m_list;
     qDebug() << formatted;
-//    env->ReleaseStringUTFChars(string, formatted);
 
-    m_model->setStringList(list);
+    m_model->setStringList(m_list);
 }
 
 //static void fromJavaCode(JNIEnv *env, jobject thiz, jint x) {
