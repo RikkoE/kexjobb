@@ -8,18 +8,38 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 {
 }
 
+void HealthyWayFunctions::deviceClicked(const int &deviceIndex)
+{
+    qDebug() << "Chosen device: " << m_list.at(deviceIndex);
+ /*   QAndroidJniObject deviceString = QAndroidJniObject::fromString(m_list.at(deviceIndex));
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+                                              "connectDevice",
+                                              "(Ljava/lang/String;)",
+                                              deviceString.object<jstring>());*/
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+                                              "connectDevice");
+
+}
+
+void HealthyWayFunctions::scanLeDevices()
+{
+
+}
+
+int HealthyWayFunctions::updateButtonClicked()
+{
+    qDebug() << "Updating heart rate!";
+    jint heart = QAndroidJniObject::callStaticMethod<jint>("org/qtproject/example/notification/NotificationClient",
+                                              "updateHeartRate");
+    qDebug() << "Heart rate: " << heart;
+    return heart;
+}
+
 void HealthyWayFunctions::onButtonClicked()
 {
     qDebug() << "bluetooth on";
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "btON");
-}
-
-void HealthyWayFunctions::scanLeDevice()
-{
-
-    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
-                                       "scan");
 }
 
 void HealthyWayFunctions::offButtonClicked()
@@ -29,17 +49,15 @@ void HealthyWayFunctions::offButtonClicked()
                                               "btOFF");
 }
 
-void HealthyWayFunctions::myObject() {
-
-}
-
-
 void HealthyWayFunctions::scanButtonClicked()
 {
+    m_list.clear();
     qDebug() << "Scan start";
     //    QStringList list;
     //    list.append("Done");
 
+    //    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+    //                                       "scan");
     QAndroidJniObject stringArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
                                                                               "scanReturn",
                                                                               "()[Ljava/lang/String;");
@@ -48,7 +66,6 @@ void HealthyWayFunctions::scanButtonClicked()
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
-    //    env->GetObjectArrayElement(arr,size);
 
     QStringList list;
 
@@ -65,21 +82,18 @@ void HealthyWayFunctions::scanButtonClicked()
     {
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
-        list.append(formatted);
+        m_list.append(formatted);
         env->ReleaseStringUTFChars(string, formatted);
         env->DeleteLocalRef(string);
     }
 
-
-    //    QString str = stringArray.toString();
     qDebug() << size;
     qDebug() << string;
-    qDebug() << strlen;
-    qDebug() << list;
+    qDebug() << m_list;
     qDebug() << formatted;
 //    env->ReleaseStringUTFChars(string, formatted);
 
-    m_model->setStringList(list);
+    m_model->setStringList(m_list);
 }
 
 //static void fromJavaCode(JNIEnv *env, jobject thiz, jint x) {

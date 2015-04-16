@@ -21,7 +21,7 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.rightMargin: 20
             y: 20
-            width: parent.width*0.4
+            width: (parent.width-60)/2
             height: parent.height*0.1
             radius: 8 // This gives rounded corners to the Rectangle
             gradient: Gradient { // This sets a vertical gradient fill
@@ -49,7 +49,7 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.leftMargin: 20
             y: 20
-            width: parent.width*0.4
+            width: (parent.width-60)/2
             height: parent.height*0.1
             radius: 8 // This gives rounded corners to the Rectangle
             gradient: Gradient { // This sets a vertical gradient fill
@@ -78,7 +78,7 @@ ApplicationWindow {
                 top: offButton.bottom;
                 topMargin: 20;
             }
-            width: parent.width-40
+            width: (parent.width-60)/2
             height: parent.height*0.1
             radius: 8 // This gives rounded corners to the Rectangle
             gradient: Gradient { // This sets a vertical gradient fill
@@ -99,14 +99,61 @@ ApplicationWindow {
             }
         }
 
-        ListView {
-            id: blueList
-            model: devicesModel
-            width: scanButton.width
-            height: parent.height*0.6
+        Rectangle {
+            id: updateButton
+            anchors {
+                right: parent.right
+                rightMargin: 20;
+                top: onButton.bottom;
+                topMargin: 20;
+            }
+            width: (parent.width-60)/2
+            height: parent.height*0.1
+            radius: 8 // This gives rounded corners to the Rectangle
+            gradient: Gradient { // This sets a vertical gradient fill
+                GradientStop { position: 0.0; color: "aqua" }
+                GradientStop { position: 1.0; color: "teal" }
+            }
+            //            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
+            Text {
+                id: updateLabel
+                anchors.centerIn: parent
+                text: "Update"
+            }
+            MouseArea{
+                id: updateMouseArea
+                anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+                //onClicked handles valid mouse button clicks
+                onClicked: {
+                    dataValueLabel.text = "Data: " + generator.updateButtonClicked() + " bpm";
+                }
+            }
+        }
+
+        Text {
+            id: dataValueLabel
+            width: parent.width-40
+            height: parent.height*0.1
             anchors {
                 left: parent.left;
                 top: scanButton.bottom;
+                topMargin: 20;
+                bottomMargin: 20;
+                leftMargin: 20;
+            }
+            text: "Data: "
+            font.pixelSize: 160
+        }
+
+        ListView {
+            id: blueList
+            model: devicesModel
+            width: parent.width-40
+            height: parent.height*0.6
+            boundsBehavior: Flickable.StopAtBounds
+            anchors {
+                left: parent.left;
+                top: dataValueLabel.bottom;
                 topMargin: 20;
                 bottomMargin: 20;
                 leftMargin: 20;
@@ -124,7 +171,11 @@ ApplicationWindow {
                 MouseArea {
                     id: bluetoothDevices
                     anchors.fill: parent
-                    onClicked: generator.deviceClicked();
+                    onClicked: {
+                        blueList.currentIndex = index;
+                        generator.deviceClicked(blueList.currentIndex);
+//                        console.log("button index: " + blueList.currentIndex);
+                    }
                 }
             }
         }
