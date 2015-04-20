@@ -53,11 +53,21 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 
 import java.util.UUID;
+import java.util.Arrays;
+import android.os.Handler;
 
 
 public class NotificationClient extends org.qtproject.qt5.android.bindings.QtActivity
 {
+
+    private static MyJavaNatives natives = new MyJavaNatives();
+
     private static NotificationClient m_instance;
+
+    private static boolean mScanning;
+
+    private static final int REQUEST_ENABLE_BT = 1;
+    // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
 //    private static native void callNativeFunction(int x);
@@ -92,7 +102,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                         System.out.println("Found a device");
                         if(device.getName() == "null" || device.getName() == "") {
                         } else {
-                            devicesFound[deviceNumber] = device.getName();
+                            devicesFound[deviceNumber] = device.getAddress();
                             deviceNumber++;
                             nrOfDevices++;
                         }
@@ -100,27 +110,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 }
             };
 
-    public static void scan() {
-
-
-        m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-//            btArrayAdapter.clear();
-            IntentFilter filter = new IntentFilter();
-            m_instance.bluetoothAdapter.startDiscovery();
-
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-            m_instance.registerReceiver(m_instance.mReceiver, filter);
-
-
-
-
-
-
-    }
 
     public static String[] scanReturn() {
         m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -179,6 +168,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static final UUID HEART_RATE_SERVICE = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private static int heartRateVal = 0;
+    private static UUID[] uuids = new UUID[1];
 
 
     public static void connectDevice(/*final String address*/) {
@@ -189,6 +179,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     }
 
     public static int updateHeartRate() {
+        String fromNative = natives.print();
         return heartRateVal;
     }
 
@@ -277,27 +268,71 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             readNextSensor(gatt);
         }
 
+    };
+
+    private static Handler mHandler = new Handler();
+    private static boolean scanTrue = true;
+
+    public static void /*String[]*/ scanLeDevices() {
+        System.out.println("Before handler");
+        scanTrue = true;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Stopping scan");
+                m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
+//                scanTrue = false;
+                sendList = processScanResult(devicesFound);
+                MyJavaNatives.sendScanResult(sendList);
+            }
+        }, 10000);
+        System.out.println("Start scanning");
+        uuids[0] = HEART_RATE_SERVICE;
+        m_instance.bluetoothAdapter.startLeScan(m_instance.mLeScanCallback);
+    }
+
+    private static String[] processScanResult(String[] foundDevices) {
+        String[] tempArray;
+        if(nrOfDevices > 0){
+            tempArray = new String[nrOfDevices];
+            for(int i=0;i<nrOfDevices;i++) {
+                tempArray[i] = foundDevices[i];
+            }
+        } else {
+            tempArray = new String[1];
+            tempArray[0] = "No devices";
+        }
+        nrOfDevices = 0;
+        deviceNumber = 0;
+        return tempArray;
+    }
 
 
+    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
 
-//        public void onDescriptorWrite (BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-//            enableNextSensor(gatt);
-//        }
+        @Override
+        public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+            int length = 0;
+            StringBuilder sb = new StringBuilder();
+                    for(byte b : scanRecord) {
+                        length++;
+                        sb.append(String.format("%02X ", b));
+                    }
 
+                    if(device.getName() == "null" || device.getName() == "") {
+                    } else {
+                        devicesFound[deviceNumber] = device.getName();
+                        deviceNumber++;
+                        nrOfDevices++;
+                    }
 
-
-//        @Override
-//        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-//            //For each read, pass the data up to the UI thread to update the display
-//            System.out.println("on characteristic read");
-
-//            System.out.println("Data: " + characteristic);
-
-//            //After reading the initial value, next we enable notifications
-////            setNotifyNextSensor(gatt);
-//        }
-
-
+            System.out.println("Device name: " + device.getName());
+            System.out.println("Device address: " + device.getAddress());
+            System.out.println("Rssi: " + rssi);
+            System.out.println("Length: " + length);
+            System.out.println("String: " + sb.toString());
+            System.out.println("Scan record: " + scanRecord);
+        }
     };
 
 }

@@ -24,4 +24,5 @@ OTHER_FILES += \
     android-sources/src/org/qtproject/example/notification/NotificationClient.java \
     android-sources/AndroidManifest.xml
 
-DISTFILES +=
+DISTFILES += \
+    android-sources/src/org/qtproject/example/notification/MyJavaNatives.java

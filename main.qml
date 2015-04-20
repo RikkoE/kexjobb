@@ -10,6 +10,11 @@ ApplicationWindow {
     Item {
         anchors.fill: parent
 
+        Loader {
+            id: mainLoader
+            focus: true
+        }
+
         Rectangle {
             width: parent.width
             height: parent.height
@@ -95,12 +100,15 @@ ApplicationWindow {
                 id: scanMouseArea
                 anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
                 //onClicked handles valid mouse button clicks
-                onClicked: generator.scanButtonClicked();
+//                onClicked: generator.scanButtonClicked();
+                onClicked: generator.scanLeDevices();
             }
         }
 
         Rectangle {
             id: updateButton
+
+
             anchors {
                 right: parent.right
                 rightMargin: 20;
@@ -125,7 +133,9 @@ ApplicationWindow {
                 anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
                 //onClicked handles valid mouse button clicks
                 onClicked: {
+//                    changeWindow.myNewFuckingWindow
                     dataValueLabel.text = "Data: " + generator.updateButtonClicked() + " bpm";
+                    mainLoader.source = "test.qml";
                 }
             }
         }

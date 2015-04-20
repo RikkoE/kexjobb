@@ -4,12 +4,14 @@
 #include <QDebug>
 #include <QObject>
 #include <QStringListModel>
+#include <QtAndroidExtras/QAndroidJniObject>
+#include <QAndroidJniEnvironment>
+#include <QWidget>
 
 class HealthyWayFunctions : public QObject
 {
     Q_OBJECT
     QStringListModel * m_model;
-    QStringList m_list;
 
 public:
     // QObjects are expected to support a parent/child hierarchy.  I've modified
@@ -23,7 +25,12 @@ public:
     Q_INVOKABLE void scanLeDevices();
     Q_INVOKABLE int updateButtonClicked();
 
+    QStringList m_list;
+
 public slots:
+    void updateModel();
+
+private:
     // This method needs to take either a QString or a const reference to one.
     // (QML doesn't support returning values via the parameter list.)
     //void buttonClicked(const QString& in);

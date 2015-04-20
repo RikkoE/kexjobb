@@ -3,7 +3,9 @@
 #include <QQmlContext>
 #include <QQuickView>
 #include <QStringListModel>
+#include <QStandardItemModel>
 #include "healthywayfunctions.h"
+#include <jni.h>
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +20,9 @@ int main(int argc, char *argv[])
     QStringListModel devicesModel;
     devicesModel.setStringList(dataList);
 
+    QStandardItemModel stdModel;
+    stdModel.setData(1, "Hello");
+
     HealthyWayFunctions generator(&devicesModel);
 
     engine.rootContext()->setContextProperty("devicesModel", &devicesModel);
@@ -25,3 +30,4 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
