@@ -1,32 +1,29 @@
 #include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickView>
+#include <QQuickWindow>
 #include <QStringListModel>
 #include <QStandardItemModel>
 #include "healthywayfunctions.h"
 #include <jni.h>
+#include <QObject>
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
-    QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    HealthyWayFunctions *generator = new HealthyWayFunctions();
 
-    QStringList dataList;
-    dataList.append("No devices");
 
-    QStringListModel devicesModel;
-    devicesModel.setStringList(dataList);
 
-    QStandardItemModel stdModel;
-    stdModel.setData(1, "Hello");
+    QQuickView *view = new QQuickView;
 
-    HealthyWayFunctions generator(&devicesModel);
-
-    engine.rootContext()->setContextProperty("devicesModel", &devicesModel);
-    engine.rootContext()->setContextProperty("generator", &generator);
+    view->rootContext()->setContextProperty("generator", generator);
+    view->setSource(QUrl("qrc:/main.qml"));
+    view->setResizeMode(QQuickView::SizeRootObjectToView);
+    view->show();
 
     return app.exec();
 }

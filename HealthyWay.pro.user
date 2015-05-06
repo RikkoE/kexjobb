@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.3.2, 2015-04-08T12:40:29. -->
+<!-- Written by QtCreator 3.3.2, 2015-05-05T14:29:34. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -644,8 +644,8 @@
      <value type="int">14</value>
     </valuelist>
     <valuemap type="QVariantMap" key="Ios.device_type">
-     <value type="QString" key="displayName">iPhone 6, iOS 8.2</value>
-     <value type="QString" key="identifier">com.apple.CoreSimulator.SimDeviceType.iPhone-6, 8.2</value>
+     <value type="QString" key="displayName">iPhone 6, iOS 8.3</value>
+     <value type="QString" key="identifier">com.apple.CoreSimulator.SimDeviceType.iPhone-6, 8.3</value>
      <value type="int" key="type">1</value>
     </valuemap>
     <valuelist type="QVariantList" key="Ios.run_arguments"/>
@@ -679,8 +679,8 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">qmake</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">QtProjectManager.QMakeBuildStep</value>
-      <value type="bool" key="QtProjectManager.QMakeBuildStep.LinkQmlDebuggingLibrary">false</value>
-      <value type="bool" key="QtProjectManager.QMakeBuildStep.LinkQmlDebuggingLibraryAuto">true</value>
+      <value type="bool" key="QtProjectManager.QMakeBuildStep.LinkQmlDebuggingLibrary">true</value>
+      <value type="bool" key="QtProjectManager.QMakeBuildStep.LinkQmlDebuggingLibraryAuto">false</value>
       <value type="QString" key="QtProjectManager.QMakeBuildStep.QMakeArguments"></value>
       <value type="bool" key="QtProjectManager.QMakeBuildStep.QMakeForced">false</value>
       <value type="bool" key="QtProjectManager.QMakeBuildStep.UseQtQuickCompiler">false</value>

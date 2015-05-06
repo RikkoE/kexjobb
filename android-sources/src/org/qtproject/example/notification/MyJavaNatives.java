@@ -4,6 +4,7 @@ public class MyJavaNatives {
 
     public static native void sendFibonaciResult(int n);
     public static native void sendScanResult(String[] array);
+    public static native void sendHeartRate(int n);
 
     public static String print() {
         sendFibonaciResult(10);
