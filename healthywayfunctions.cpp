@@ -240,7 +240,13 @@ void HealthyWayFunctions::scanButtonClicked()
 
     QAndroidJniEnvironment env;
 
+    QStringList list;
+
     int size = env->GetArrayLength(arr);
+//    jstring string = (jstring)env->GetObjectArrayElement(arr, 0);
+
+//    const char *formatted = env->GetStringUTFChars(string, 0);
+//    list.append(formatted);
 
     jstring string;
     const char *formatted;
@@ -258,6 +264,7 @@ void HealthyWayFunctions::scanButtonClicked()
     qDebug() << string;
     qDebug() << m_list;
     qDebug() << formatted;
+//    env->ReleaseStringUTFChars(string, formatted);
 
 //    m_model->setStringList(m_list);
 }

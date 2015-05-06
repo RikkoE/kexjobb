@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+<<<<<<< HEAD
+        <file>test.qml</file>
+        <file>dataPage.qml</file>
+=======
+        <file>listResources.qml</file>
+>>>>>>> 9dbad8b9d5eb86087d8146dd251858b2b42af8cf
+    </qresource>
+</RCC>
