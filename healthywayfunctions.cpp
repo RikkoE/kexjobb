@@ -10,7 +10,16 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 {
 //    connect(m_model, SIGNAL(listChanged(QStringList)), this, SLOT(setList(QStringList)));
 
+    mythread = new MyThread(this);
 
+    connect(mythread, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+}
+
+void HealthyWayFunctions::onValueChanged(int newValue)
+{
+    updateData();
+//    m_bleData = newValue;
+//    emit bleDataChanged();
 }
 
 HealthyWayFunctions &HealthyWayFunctions::instance(QObject *parent)
@@ -90,12 +99,14 @@ void HealthyWayFunctions::getCharacteristicData(const int &deviceIndex)
                                               "getCharacData",
                                               "(I)V",
                                               deviceIndex);
-    m_bleData = QVariant::fromValue(1);
+    QVariant qv(" ");
+    m_bleData = qv;
     emit bleDataChanged();
 }
 
 void HealthyWayFunctions::disconnectNotification()
 {
+    mythread->Stop = true;
 
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "disconnectNotification",
@@ -105,9 +116,8 @@ void HealthyWayFunctions::disconnectNotification()
 
 void HealthyWayFunctions::testThreads()
 {
-    moveToThread(&thread);
-    connect(&thread, SIGNAL(started()), this, SLOT(doWork()));
-    thread.start();
+    mythread->Stop = false;
+    mythread->start();
 }
 
 void HealthyWayFunctions::updateData()
@@ -309,10 +319,12 @@ void HealthyWayFunctions::doWork()
         m_bleData = QVariant::fromValue(i);
 //        qDebug() << "loop nr: " << i;
         emit bleDataChanged();
-        usleep(1000);
+        usleep(500);
     }
     QThread::currentThread()->quit();
 }
+
+
 
 // step 2
 // create a vector with all our JNINativeMethod(s)

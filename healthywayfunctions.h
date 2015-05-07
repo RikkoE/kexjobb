@@ -11,6 +11,8 @@
 #include <QVariant>
 #include <unistd.h>
 #include <QThread>
+#include <QtConcurrent/QtConcurrent>
+#include "mythread.h"
 
 
 class HealthyWayFunctions : public QObject
@@ -25,6 +27,8 @@ public:
     // QObjects are expected to support a parent/child hierarchy.  I've modified
     // the constructor to match the standard.
     HealthyWayFunctions(QObject *parent = 0);
+
+    MyThread *mythread;
 
     static HealthyWayFunctions &instance(QObject *parent = 0);
 
@@ -63,6 +67,8 @@ public slots:
     void handleSubmitTextField(QString newText);
     void doWork();
 
+    void onValueChanged(int);
+
 signals:
     void setTextField(QVariant text);
 
@@ -75,6 +81,8 @@ signals:
     void deviceListChanged();
 
     void bleDataChanged();
+
+    void startThread();
 
 private:
     // This method needs to take either a QString or a const reference to one.

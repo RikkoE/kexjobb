@@ -30,7 +30,8 @@ Rectangle {
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
             //onClicked handles valid mouse button clicks
             onClicked: {
-                generator.testThreads();
+                generator.testThreads()
+//                generator.updateData();
             }
         }
     }

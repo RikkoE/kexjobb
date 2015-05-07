@@ -7,6 +7,24 @@ Rectangle {
     visible: true
     anchors.fill: parent
 
+//    ProgressBar {
+//        id: progress
+//        anchors.verticalCenter: parent.verticalCenter
+//        anchors.horizontalCenter: parent.horizontalCenter
+
+//        minimumValue: 0
+//        maximumValue: 100
+//        value: 0
+//    }
+
+//    Timer {
+//        id: timer
+//        interval: 1000
+//        repeat: true
+//        running: false
+//        onTriggered: progress.value < progress.maximumValue ? progress.value += 1.0 : progress.value = progress.minimumValue
+//    }
+
     // This element displays a rectangle with a gradient and a border
     Rectangle {
         id: onButton
@@ -88,7 +106,10 @@ Rectangle {
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
             //onClicked handles valid mouse button clicks
             //                onClicked: generator.scanButtonClicked();
-            onClicked: generator.scanLeDevices();
+            onClicked: {
+//                timer.restart()
+                generator.scanLeDevices();
+            }
         }
     }
 

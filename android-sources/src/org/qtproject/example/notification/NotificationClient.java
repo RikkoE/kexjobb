@@ -350,7 +350,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 heartRateVal = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
 //                MyJavaNatives.sendHeartRate(heartRateVal);
             } else if(ECG_MEASUREMENT_CHARACTERISTIC.equals(characteristic.getUuid())) {
-                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
                 System.out.println("Timestamp: " + glob_ecgTimeStamp);
 
                 int offset = 2;

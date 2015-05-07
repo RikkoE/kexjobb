@@ -16,8 +16,6 @@ int main(int argc, char *argv[])
 
     HealthyWayFunctions *generator = new HealthyWayFunctions();
 
-
-
     QQuickView *view = new QQuickView;
 
     view->rootContext()->setContextProperty("generator", generator);
