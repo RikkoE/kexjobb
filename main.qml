@@ -3,14 +3,48 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls.Styles 1.3
-
+import QtGraphicalEffects 1.0
 Rectangle {
     visible: true
     anchors.fill: parent
+
+
     gradient: Gradient { // This sets a vertical gradient fill
-        GradientStop { position: 0.0; color: "black" }
         GradientStop { position: 1.0; color: "white" }
+        GradientStop { position: 0.5; color: "light blue" }
+        GradientStop { position: 0.0; color: "white" }
     }
+
+    Text {
+        opacity: 0.2
+        font.pixelSize: 200
+        visible: true
+        id: backGroundLabel
+        anchors.centerIn: parent
+        text:"Healthyway"
+        color: "white"
+        smooth: true
+    }
+    DropShadow {
+            opacity: 0.2
+            anchors.fill: backGroundLabel
+            horizontalOffset: 0
+            verticalOffset: 20
+            fast: true
+            radius: 20.0
+            samples: 16
+            spread: 0.5
+            color: "#000000"
+            source: backGroundLabel
+        }
+
+    FastBlur {
+        transparentBorder: true
+        anchors.fill: backGroundLabel
+        source: backGroundLabel
+        radius: 64
+    }
+
     // This element displays a rectangle with a gradient and a border
     Rectangle {
         id: onButton
@@ -20,22 +54,38 @@ Rectangle {
         width: (parent.width-60)/2
         height: parent.height*0.1
         smooth: true
-        radius: 800 // This gives rounded corners to the Rectangle
+        radius: 20 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
             GradientStop { position: 0.0; color: "grey" }
             GradientStop { position: 1.0; color: "white" }
         }
+        border.color: "black"
+        border.width: 5
         //            border { width: 3; color: "white" } // This sets a 3px wide black border to be drawn
         Text {
             id: onLabel
             anchors.centerIn: parent
             text: "Bluetooth ON"
         }
+//        DropShadow {
+//                anchors.fill: onButton
+//                horizontalOffset: 3
+//                verticalOffset: 3
+//                fast: true
+//                radius: 20.0
+//                samples: 16
+//                spread: 0.5
+//                color: "#000000"
+//                source: onButton
+//            }
+
         MouseArea{
             id: onMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
             //onClicked handles valid mouse button clicks
             //onClicked: console.log(onLabel.text + " clicked" )
+            onPressed: onButton.scale = 0.7
+            onReleased: onButton.scale = 1.0
             onClicked: generator.onButtonClicked()
         }
     }
@@ -48,11 +98,13 @@ Rectangle {
         y: 20
         width: (parent.width-60)/2
         height: parent.height*0.1
-        radius: 800 // This gives rounded corners to the Rectangle
+        radius: 20 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
             GradientStop { position: 0.0; color: "grey" }
             GradientStop { position: 1.0; color: "white" }
         }
+        border.color: "black"
+        border.width: 5
         //            border { width: 3; color: "white" } // This sets a 3px wide black border to be drawn
         Text {
             id: offLabel
@@ -63,20 +115,22 @@ Rectangle {
             id: offMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
             //onClicked handles valid mouse button clicks
+            onPressed: offButton.scale = 0.7
+            onReleased: offButton.scale = 1.0
             onClicked: generator.offButtonClicked()
         }
     }
 
-    BusyIndicator {
-     id: busyIndication
-     visible: false
-     anchors.centerIn: parent
-//     onRunningChanged: generator.scanLeDevices()
-     // 'running' defaults to 'true'
-    Component.onCompleted: {
-            console.log("Busyindicator has loaded")
-        }
-    }
+    //        BusyIndicator {
+    //         id: busyIndication
+    //         visible: false
+    //         anchors.centerIn: parent
+    //    //     onRunningChanged: generator.scanLeDevices()
+    //         // 'running' defaults to 'true'
+    //        Component.onCompleted: {
+    //                console.log("Busyindicator has loaded")
+    //            }
+    //        }
 
     Rectangle {
         id: scanButton
@@ -88,12 +142,14 @@ Rectangle {
         }
         width: parent.width-40
         height: parent.height*0.1
-        radius: 800 // This gives rounded corners to the Rectangle
+        radius: 20 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
             GradientStop { position: 0.0; color: "grey" }
             GradientStop { position: 1.0; color: "white" }
         }
         //            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
+        border.color: "black"
+        border.width: 5
         Text {
             id: scanLabel
             anchors.centerIn: parent
@@ -102,11 +158,14 @@ Rectangle {
         MouseArea{
             id: scanMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+            //            onPressed: busyIndication.visible = true
+            onPressed: scanButton.scale = 0.7
+            onReleased: scanButton.scale = 1.0
             //onClicked handles valid mouse button clicks
             //                onClicked: generator.scanButtonClicked();
             onClicked: {
-                busyIndication.visible = true
-                generator.startScanThread();
+                //                busyIndication.visible = true
+                generator.scanLeDevices();
             }
         }
     }
@@ -117,7 +176,7 @@ Rectangle {
         width: parent.width-40
         height: parent.height*0.6
         clip: true
-//        boundsBehavior: Flickable.StopAtBounds
+        //        boundsBehavior: Flickable.StopAtBounds
         anchors {
             left: parent.left;
             top: scanButton.bottom;
@@ -127,16 +186,21 @@ Rectangle {
         }
         spacing: 40
         delegate: Rectangle  {
+            border.color: "black"
+            border.width: 5
+            radius: 20
+            //            color: "light blue"
             gradient: Gradient { // This sets a vertical gradient fill
-                GradientStop { position: 0.0; color: "grey" }
-                GradientStop { position: 1.0; color: "blue" }
+                GradientStop { position: 0.0; color: "transparent" }
+//                GradientStop { position: 0.5; color: "#051BF1" }
+                GradientStop { position: 1.0; color: "transparent"}
             }
-            //                anchors.topMargin: 40
+            anchors.topMargin: 40
             height: parent.parent.height*0.2
             width: parent.width
             border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
             Text {
-                color: "white"
+                color: "black"
                 anchors.centerIn: parent
                 text: modelData
             }

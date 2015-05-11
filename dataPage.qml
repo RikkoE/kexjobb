@@ -27,6 +27,8 @@ Rectangle {
         MouseArea{
             id: updateMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+            onPressed: updateButton.scale = 0.7
+            onReleased: updateButton.scale = 1.0
             //onClicked handles valid mouse button clicks
             onClicked: {
                 generator.testThreads()
@@ -59,6 +61,8 @@ Rectangle {
         MouseArea{
             id: backMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+            onPressed: backButton.scale = 0.7
+            onReleased: backButton.scale = 1.0
             //onClicked handles valid mouse button clicks
             onClicked: {
                 generator.disconnectNotification()

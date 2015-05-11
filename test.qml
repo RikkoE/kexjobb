@@ -5,6 +5,11 @@ import QtQuick.Dialogs 1.2
 Rectangle {
     visible: true
 
+    gradient: Gradient { // This sets a vertical gradient fill
+        GradientStop { position: 0.0; color: "black" }
+        GradientStop { position: 1.0; color: "white" }
+    }
+
     Rectangle {
         id: disconnectButton
         anchors.left: parent.left
@@ -14,8 +19,8 @@ Rectangle {
         height: parent.height*0.1
         radius: 8 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
         //            border { width: 3; color: "white" } // This sets a 3px wide black border to be drawn
 
@@ -29,7 +34,8 @@ Rectangle {
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
             //onClicked handles valid mouse button clicks
             //onClicked: console.log(onLabel.text + " clicked" )
-
+            onPressed: disconnectButton.scale = 0.7
+            onReleased: disconnectButton.scale = 1.0
             onClicked: {
                 generator.disconnectDevice()
                 pageLoader.source = "main.qml"
