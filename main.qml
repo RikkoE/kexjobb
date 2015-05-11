@@ -2,29 +2,15 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
+import QtQuick.Controls.Styles 1.3
 
 Rectangle {
     visible: true
     anchors.fill: parent
-
-//    ProgressBar {
-//        id: progress
-//        anchors.verticalCenter: parent.verticalCenter
-//        anchors.horizontalCenter: parent.horizontalCenter
-
-//        minimumValue: 0
-//        maximumValue: 100
-//        value: 0
-//    }
-
-//    Timer {
-//        id: timer
-//        interval: 1000
-//        repeat: true
-//        running: false
-//        onTriggered: progress.value < progress.maximumValue ? progress.value += 1.0 : progress.value = progress.minimumValue
-//    }
-
+    gradient: Gradient { // This sets a vertical gradient fill
+        GradientStop { position: 0.0; color: "black" }
+        GradientStop { position: 1.0; color: "white" }
+    }
     // This element displays a rectangle with a gradient and a border
     Rectangle {
         id: onButton
@@ -33,10 +19,11 @@ Rectangle {
         y: 20
         width: (parent.width-60)/2
         height: parent.height*0.1
-        radius: 8 // This gives rounded corners to the Rectangle
+        smooth: true
+        radius: 800 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
         //            border { width: 3; color: "white" } // This sets a 3px wide black border to be drawn
         Text {
@@ -61,10 +48,10 @@ Rectangle {
         y: 20
         width: (parent.width-60)/2
         height: parent.height*0.1
-        radius: 8 // This gives rounded corners to the Rectangle
+        radius: 800 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
         //            border { width: 3; color: "white" } // This sets a 3px wide black border to be drawn
         Text {
@@ -80,6 +67,17 @@ Rectangle {
         }
     }
 
+//    BusyIndicator {
+//     id: busyIndication
+//     visible: false
+//     anchors.centerIn: parent
+////     onRunningChanged: generator.scanLeDevices()
+//     // 'running' defaults to 'true'
+//    Component.onCompleted: {
+//            console.log("Busyindicator has loaded")
+//        }
+//    }
+
     Rectangle {
         id: scanButton
         anchors {
@@ -90,10 +88,10 @@ Rectangle {
         }
         width: parent.width-40
         height: parent.height*0.1
-        radius: 8 // This gives rounded corners to the Rectangle
+        radius: 800 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
         //            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
         Text {
@@ -107,8 +105,8 @@ Rectangle {
             //onClicked handles valid mouse button clicks
             //                onClicked: generator.scanButtonClicked();
             onClicked: {
-//                timer.restart()
-                generator.scanLeDevices();
+//                busyIndication.visible = true
+                    generator.scanLeDevices();
             }
         }
     }
@@ -118,7 +116,8 @@ Rectangle {
         model: generator.deviceList
         width: parent.width-40
         height: parent.height*0.6
-        boundsBehavior: Flickable.StopAtBounds
+        clip: true
+//        boundsBehavior: Flickable.StopAtBounds
         anchors {
             left: parent.left;
             top: scanButton.bottom;
@@ -128,11 +127,16 @@ Rectangle {
         }
         spacing: 40
         delegate: Rectangle  {
+            gradient: Gradient { // This sets a vertical gradient fill
+                GradientStop { position: 0.0; color: "grey" }
+                GradientStop { position: 1.0; color: "blue" }
+            }
             //                anchors.topMargin: 40
             height: parent.parent.height*0.2
             width: parent.width
             border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
             Text {
+                color: "white"
                 anchors.centerIn: parent
                 text: modelData
             }

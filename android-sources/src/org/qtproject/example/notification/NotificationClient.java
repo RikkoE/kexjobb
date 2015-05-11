@@ -350,15 +350,18 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 heartRateVal = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
 //                MyJavaNatives.sendHeartRate(heartRateVal);
             } else if(ECG_MEASUREMENT_CHARACTERISTIC.equals(characteristic.getUuid())) {
-                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
+                byte[] bytes;
+                bytes = characteristic.getValue();
+
+//                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
+                glob_ecgTimeStamp = getIntSixteen(bytes,0);
                 System.out.println("Timestamp: " + glob_ecgTimeStamp);
 
                 int offset = 2;
-                byte[] bytes;
-                bytes = characteristic.getValue();
+
                 for(int i = 0; i < glob_ecgDataArray.length; i++) {
 //                    glob_ecgDataArray[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
-                    glob_ecgDataArray[i] = getInt(bytes, offset);
+                    glob_ecgDataArray[i] = getIntTwentyFour(bytes, offset);
                     System.out.println("Sample " + (i+1) + ": " + glob_ecgDataArray[i]);
                     offset += 3;
                 }
@@ -440,7 +443,13 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
     };
 
-    public int getInt(byte[] array, int offset) {
+    public int getIntSixteen(byte[] array, int offset) {
+        return
+          ((array[offset] & 0xff) << 8) |
+           (array[offset+1] & 0xff);
+    }
+
+    public int getIntTwentyFour(byte[] array, int offset) {
         return
           ((array[offset] & 0xff) << 16) |
           ((array[offset+1] & 0xff) << 8) |
