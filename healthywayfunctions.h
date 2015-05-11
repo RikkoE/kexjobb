@@ -29,6 +29,7 @@ public:
     HealthyWayFunctions(QObject *parent = 0);
 
     MyThread *mythread;
+    MyThread *scanThread;
 
     static HealthyWayFunctions &instance(QObject *parent = 0);
 
@@ -36,14 +37,13 @@ public:
     Q_INVOKABLE void offButtonClicked();
     Q_INVOKABLE void onButtonClicked();
     Q_INVOKABLE void deviceClicked(const int &deviceIndex);
-    Q_INVOKABLE void scanLeDevices();
     Q_INVOKABLE int updateButtonClicked();
     Q_INVOKABLE void disconnectDevice();
     Q_INVOKABLE void listServices();
     Q_INVOKABLE void getCharacteristicData(const int &deviceIndex);
     Q_INVOKABLE void disconnectNotification();
     Q_INVOKABLE void testThreads();
-    Q_INVOKABLE void updateData();
+    Q_INVOKABLE void startScanThread();
 
     void invokeSignal(QStringList);
     QVariant getServiceList();
@@ -67,7 +67,9 @@ public slots:
     void handleSubmitTextField(QString newText);
     void doWork();
 
-    void onValueChanged(int);
+//    void onValueChanged(int);
+    void scanLeDevices();
+    void updateData();
 
 signals:
     void setTextField(QVariant text);

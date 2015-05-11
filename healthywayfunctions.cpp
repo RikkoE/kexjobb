@@ -3,7 +3,7 @@
 #include <QtAndroidExtras/QAndroidJniObject>
 #include <QAndroidJniEnvironment>
 #include <QDebug>
-#include "serviceinformation.h"
+//#include "serviceinformation.h"
 #include <thread>
 
 HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
@@ -11,16 +11,16 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 //    connect(m_model, SIGNAL(listChanged(QStringList)), this, SLOT(setList(QStringList)));
 
     mythread = new MyThread(this);
+    scanThread = new MyThread(this);
 
-    connect(mythread, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+    connect(mythread, SIGNAL(valueChanged(int)), this, SLOT(updateData()));
+    connect(scanThread, SIGNAL(valueChanged(int)), this, SLOT(scanLeDevices()));
 }
 
-void HealthyWayFunctions::onValueChanged(int newValue)
-{
-    updateData();
-//    m_bleData = newValue;
-//    emit bleDataChanged();
-}
+//void HealthyWayFunctions::onValueChanged(int newValue)
+//{
+//    updateData();
+//}
 
 HealthyWayFunctions &HealthyWayFunctions::instance(QObject *parent)
 {
@@ -120,6 +120,14 @@ void HealthyWayFunctions::testThreads()
     mythread->start();
 }
 
+void HealthyWayFunctions::startScanThread()
+{
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
+                                              "scanLeDevices");
+    scanThread->Stop = false;
+    scanThread->start();
+}
+
 void HealthyWayFunctions::updateData()
 {
     QAndroidJniObject javaArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
@@ -169,23 +177,30 @@ QVariant HealthyWayFunctions::getBleData()
 
 void HealthyWayFunctions::scanLeDevices()
 {
+    jboolean scanning = QAndroidJniObject::callStaticMethod<jboolean>("org/qtproject/example/notification/NotificationClient",
+                                                                      "scanningStatus");
+    if(scanning == 0) {
+        scanThread->Stop = true;
+        return;
+    }
+
     m_list.clear();
-    qDebug() << "Scan start";
+//    qDebug() << "Scan start";
 
 //    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
 //                                              "scanLeDevices");
 
     QAndroidJniObject stringArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
-                                                                              "scanLeDevices",
+                                                                              "getDeviceList",
                                                                               "()[Ljava/lang/String;");
-    qDebug() << "Scan stopped";
+//    qDebug() << "Scan stopped";
 
     jobjectArray arr = stringArray.object<jobjectArray>();
 
     QAndroidJniEnvironment env;
 
     int size = env->GetArrayLength(arr);
-    qDebug() << "size: " << size;
+//    qDebug() << "size: " << size;
 
     jstring string;
     const char *formatted;
@@ -199,14 +214,15 @@ void HealthyWayFunctions::scanLeDevices()
         env->DeleteLocalRef(string);
     }
 
-    qDebug() << size;
-    qDebug() << string;
-    qDebug() << m_list;
-    qDebug() << formatted;
+//    qDebug() << size;
+//    qDebug() << string;
+//    qDebug() << m_list;
+//    qDebug() << formatted;
 
     m_devices = m_list;
 
     emit deviceListChanged();
+//    scanThread->Stop = true;
 }
 
 int HealthyWayFunctions::updateButtonClicked()

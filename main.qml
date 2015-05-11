@@ -67,16 +67,16 @@ Rectangle {
         }
     }
 
-//    BusyIndicator {
-//     id: busyIndication
-//     visible: false
-//     anchors.centerIn: parent
-////     onRunningChanged: generator.scanLeDevices()
-//     // 'running' defaults to 'true'
-//    Component.onCompleted: {
-//            console.log("Busyindicator has loaded")
-//        }
-//    }
+    BusyIndicator {
+     id: busyIndication
+     visible: false
+     anchors.centerIn: parent
+//     onRunningChanged: generator.scanLeDevices()
+     // 'running' defaults to 'true'
+    Component.onCompleted: {
+            console.log("Busyindicator has loaded")
+        }
+    }
 
     Rectangle {
         id: scanButton
@@ -105,8 +105,8 @@ Rectangle {
             //onClicked handles valid mouse button clicks
             //                onClicked: generator.scanButtonClicked();
             onClicked: {
-//                busyIndication.visible = true
-                    generator.scanLeDevices();
+                busyIndication.visible = true
+                generator.startScanThread();
             }
         }
     }
@@ -146,12 +146,13 @@ Rectangle {
                 onClicked: {
                     //                        test2.visible=true
                     blueList.currentIndex = index;
+//                    console.log("button index: " + blueList.currentIndex);
                     generator.deviceClicked(blueList.currentIndex);
                     generator.listServices();
                     //                        test.visible=false
                     pageLoader.source = "test.qml"
                     // listDialog.visible = true
-                    //                        console.log("button index: " + blueList.currentIndex);
+
                 }
             }
         }

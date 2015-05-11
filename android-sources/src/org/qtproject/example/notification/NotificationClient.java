@@ -467,26 +467,38 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static Handler mHandler = new Handler();
     private static boolean scanning = true;
 
-    public static String[] scanLeDevices() {
+    public static void /*String[]*/ scanLeDevices() {
         sendList = null;
-        System.out.println("Before handler");
+//        System.out.println("Before handler");
         scanning = true;
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 System.out.println("Stopping scan");
                 m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
-                sendList = processScanResult(devicesFound);
+//                sendList = processScanResult(devicesFound);
                 scanning = false;
 //                MyJavaNatives.sendScanResult(sendList);
+                nrOfDevices = 0;
+
             }
         }, SCAN_PERIOD);
         System.out.println("Start scanning");
-        uuids[0] = HEART_RATE_SERVICE;
+//        uuids[0] = HEART_RATE_SERVICE;
         m_instance.bluetoothAdapter.startLeScan(m_instance.mLeScanCallback);
-        while(scanning);
+//        while(scanning);
+//        System.out.println("Send list: " + Arrays.toString(sendList));
+//        return sendList;
+    }
+
+    public static String[] getDeviceList() {
+        sendList = processScanResult(devicesFound);
         System.out.println("Send list: " + Arrays.toString(sendList));
         return sendList;
+    }
+
+    public static boolean scanningStatus() {
+        return scanning;
     }
 
     private static String[] processScanResult(String[] foundDevices) {
@@ -500,7 +512,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             tempArray = new String[1];
             tempArray[0] = "No devices";
         }
-        nrOfDevices = 0;
+//        nrOfDevices = 0;
         deviceNumber = 0;
         return tempArray;
     }
@@ -510,19 +522,19 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
             int length = 0;
-            StringBuilder sb = new StringBuilder();
-                    for(byte b : scanRecord) {
-                        length++;
-                        sb.append(String.format("%02X ", b));
-                    }
+//            StringBuilder sb = new StringBuilder();
+//                    for(byte b : scanRecord) {
+//                        length++;
+//                        sb.append(String.format("%02X ", b));
+//                    }
 
-                    if(device.getName().equals("null") || device.getName() == "") {
-                    } else {
-                        devicesFound[deviceNumber] = device.getName();
-                        devicesFoundAddresses[deviceNumber] = device.getAddress();
-                        deviceNumber++;
-                        nrOfDevices++;
-                    }
+            if(device.getName().equals("null") || device.getName() == "") {
+            } else {
+                devicesFound[deviceNumber] = device.getName();
+                devicesFoundAddresses[deviceNumber] = device.getAddress();
+                deviceNumber++;
+                nrOfDevices++;
+            }
 
             System.out.println("Device name: " + device.getName());
             System.out.println("Device address: " + device.getAddress());
