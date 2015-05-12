@@ -122,6 +122,7 @@ void HealthyWayFunctions::testThreads()
 
 void HealthyWayFunctions::startScanThread()
 {
+    emit scanningStarted();
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "scanLeDevices");
     scanThread->Stop = false;
@@ -181,6 +182,7 @@ void HealthyWayFunctions::scanLeDevices()
                                                                       "scanningStatus");
     if(scanning == 0) {
         scanThread->Stop = true;
+        emit scanningStopped();
         return;
     }
 

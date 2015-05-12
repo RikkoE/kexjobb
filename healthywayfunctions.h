@@ -86,6 +86,9 @@ signals:
 
     void startThread();
 
+    void scanningStarted();
+    void scanningStopped();
+
 private:
     // This method needs to take either a QString or a const reference to one.
     // (QML doesn't support returning values via the parameter list.)

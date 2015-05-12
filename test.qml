@@ -19,7 +19,7 @@ Rectangle {
         visible: true
         id: backGroundLabel
         anchors.centerIn: parent
-        text:"Pungluder"
+        text:"Healthyway"
         color: "white"
         smooth: true
     }

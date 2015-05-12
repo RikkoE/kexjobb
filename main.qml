@@ -143,9 +143,28 @@ Rectangle {
             onPressed: scanButton.scale = 0.7
             onReleased: scanButton.scale = 1.0
             onClicked: {
-                loadingScreen.visible = true
+                //                loadingScreen.visible = true
                 generator.startScanThread();
             }
+        }
+    }
+
+    Connections {
+        target: generator
+
+        onScanningStarted: {
+            loadingScreen.visible = true
+            scanMouseArea.enabled = false
+            blueList.enabled = false
+            offMouseArea.enabled = false
+            onMouseArea.enabled = false
+        }
+        onScanningStopped: {
+            loadingScreen.visible = false
+            scanMouseArea.enabled = true
+            blueList.enabled = true
+            offMouseArea.enabled = true
+            onMouseArea.enabled = true
         }
     }
 
@@ -166,6 +185,7 @@ Rectangle {
 
         spacing: 40
         delegate: Rectangle  {
+            id: delegateRect
             height: parent.parent.height*0.2
             width: parent.width
 
@@ -218,7 +238,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: -80
-                text: "Scanning..."
+                text: "Scanning"
                 font.pixelSize: 100
             }
 
