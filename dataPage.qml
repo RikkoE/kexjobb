@@ -1,5 +1,43 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
+
 Rectangle {
+
+    gradient: Gradient { // This sets a vertical gradient fill
+        GradientStop { position: 1.0; color: "white" }
+        GradientStop { position: 0.5; color: "light blue" }
+        GradientStop { position: 0.0; color: "white" }
+    }
+
+    Text {
+        opacity: 0.2
+        font.pixelSize: 200
+        visible: true
+        id: backGroundLabel
+        anchors.centerIn: parent
+        text:"Bumsluder"
+        color: "white"
+        smooth: true
+    }
+    DropShadow {
+        opacity: 0.2
+        anchors.fill: backGroundLabel
+        horizontalOffset: 0
+        verticalOffset: 20
+        fast: true
+        radius: 20.0
+        samples: 16
+        spread: 0.5
+        color: "#000000"
+        source: backGroundLabel
+    }
+
+    FastBlur {
+        transparentBorder: true
+        anchors.fill: backGroundLabel
+        source: backGroundLabel
+        radius: 64
+    }
 
     Rectangle {
         id: updateButton
@@ -12,13 +50,14 @@ Rectangle {
         y: 20
         width: (parent.width-60)/2
         height: parent.height*0.1
-        radius: 8 // This gives rounded corners to the Rectangle
+        smooth: true
+        radius: 20 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
-        //            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
-
+        border.color: "black"
+        border.width: 5
         Text {
             id: updateLabel
             anchors.centerIn: parent
@@ -47,12 +86,15 @@ Rectangle {
         y: 20
         width: (parent.width-60)/2
         height: parent.height*0.1
-        radius: 8 // This gives rounded corners to the Rectangle
+        smooth: true
+        radius: 20 // This gives rounded corners to the Rectangle
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "aqua" }
-            GradientStop { position: 1.0; color: "teal" }
+            GradientStop { position: 0.0; color: "grey" }
+            GradientStop { position: 1.0; color: "white" }
         }
-        //            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
+        border.color: "black"
+        border.width: 5
+
         Text {
             id: backLabel
             anchors.centerIn: parent

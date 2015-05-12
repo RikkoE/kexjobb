@@ -4,6 +4,7 @@ import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls.Styles 1.3
 import QtGraphicalEffects 1.0
+
 Rectangle {
     visible: true
     anchors.fill: parent
@@ -26,17 +27,17 @@ Rectangle {
         smooth: true
     }
     DropShadow {
-            opacity: 0.2
-            anchors.fill: backGroundLabel
-            horizontalOffset: 0
-            verticalOffset: 20
-            fast: true
-            radius: 20.0
-            samples: 16
-            spread: 0.5
-            color: "#000000"
-            source: backGroundLabel
-        }
+        opacity: 0.2
+        anchors.fill: backGroundLabel
+        horizontalOffset: 0
+        verticalOffset: 20
+        fast: true
+        radius: 20.0
+        samples: 16
+        spread: 0.5
+        color: "#000000"
+        source: backGroundLabel
+    }
 
     FastBlur {
         transparentBorder: true
@@ -67,17 +68,17 @@ Rectangle {
             anchors.centerIn: parent
             text: "Bluetooth ON"
         }
-//        DropShadow {
-//                anchors.fill: onButton
-//                horizontalOffset: 3
-//                verticalOffset: 3
-//                fast: true
-//                radius: 20.0
-//                samples: 16
-//                spread: 0.5
-//                color: "#000000"
-//                source: onButton
-//            }
+        //        DropShadow {
+        //                anchors.fill: onButton
+        //                horizontalOffset: 3
+        //                verticalOffset: 3
+        //                fast: true
+        //                radius: 20.0
+        //                samples: 16
+        //                spread: 0.5
+        //                color: "#000000"
+        //                source: onButton
+        //            }
 
         MouseArea{
             id: onMouseArea
@@ -165,7 +166,7 @@ Rectangle {
             //                onClicked: generator.scanButtonClicked();
             onClicked: {
                 //                busyIndication.visible = true
-                generator.scanLeDevices();
+                generator.startScanThread();
             }
         }
     }
@@ -176,7 +177,7 @@ Rectangle {
         width: parent.width-40
         height: parent.height*0.6
         clip: true
-        //        boundsBehavior: Flickable.StopAtBounds
+
         anchors {
             left: parent.left;
             top: scanButton.bottom;
@@ -184,21 +185,23 @@ Rectangle {
             bottomMargin: 20;
             leftMargin: 20;
         }
+
         spacing: 40
         delegate: Rectangle  {
-            border.color: "black"
-            border.width: 5
+            height: parent.parent.height*0.2
+            width: parent.width
+
             radius: 20
-            //            color: "light blue"
+            border {
+                color: "black"
+                width: 5
+            }
             gradient: Gradient { // This sets a vertical gradient fill
                 GradientStop { position: 0.0; color: "transparent" }
-//                GradientStop { position: 0.5; color: "#051BF1" }
                 GradientStop { position: 1.0; color: "transparent"}
             }
             anchors.topMargin: 40
-            height: parent.parent.height*0.2
-            width: parent.width
-            border { width: 3; color: "black" } // This sets a 3px wide black border to be drawn
+
             Text {
                 color: "black"
                 anchors.centerIn: parent
@@ -210,7 +213,7 @@ Rectangle {
                 onClicked: {
                     //                        test2.visible=true
                     blueList.currentIndex = index;
-//                    console.log("button index: " + blueList.currentIndex);
+                    //                    console.log("button index: " + blueList.currentIndex);
                     generator.deviceClicked(blueList.currentIndex);
                     generator.listServices();
                     //                        test.visible=false
@@ -221,7 +224,6 @@ Rectangle {
             }
         }
     }
-    //    }
     Loader {
         id: pageLoader
         anchors.fill: parent
