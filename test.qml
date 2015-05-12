@@ -57,8 +57,8 @@ Rectangle {
             width: 5
         }
         gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "transparent" }
-            GradientStop { position: 1.0; color: "transparent"}
+            GradientStop { position: 0.0; color: "white" }
+            GradientStop { position: 1.0; color: "gray"}
         }
         Text {
             id: disconnectLabel
