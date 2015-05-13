@@ -212,7 +212,7 @@ Rectangle {
                     blueList.currentIndex = index;
                     generator.deviceClicked(blueList.currentIndex);
                     generator.listServices();
-                    pageLoader.source = "test.qml"
+                    pageLoader.source = "servicePage.qml"
                 }
             }
         }

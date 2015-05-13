@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>test.qml</file>
+        <file>servicePage.qml</file>
         <file>dataPage.qml</file>
     </qresource>
 </RCC>

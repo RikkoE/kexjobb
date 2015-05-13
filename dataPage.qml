@@ -92,8 +92,11 @@ Rectangle {
             GradientStop { position: 0.0; color: "grey" }
             GradientStop { position: 1.0; color: "white" }
         }
-        border.color: "black"
-        border.width: 5
+
+        border {
+            color: "black"
+            width: 5
+        }
 
         Text {
             id: backLabel
@@ -108,7 +111,7 @@ Rectangle {
             //onClicked handles valid mouse button clicks
             onClicked: {
                 generator.disconnectNotification()
-                pageLoader.source = "test.qml"
+                pageLoader.source = "servicePage.qml"
             }
         }
     }

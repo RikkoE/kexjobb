@@ -114,72 +114,10 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
     private static final String TAG = "Notification client";
 
-
     public NotificationClient()
     {
         m_instance = this;
     }
-
-//    BroadcastReceiver mReceiver = new BroadcastReceiver() {
-//                public void onReceive(Context context, Intent intent) {
-//                    String action = intent.getAction();
-
-//                    if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-//                        searching = true;
-//                        //discovery starts, we can show progress dialog or perform other tasks
-//                    } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-//                        searching = false;
-//                        //discovery finishes, dismiss progress dialog
-//                    } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-//                        //bluetooth device found
-//                        BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                        System.out.println("Found a device");
-//                        if(device.getName() == "null" || device.getName() == "") {
-//                        } else {
-//                            devicesFound[deviceNumber] = device.getAddress();
-//                            deviceNumber++;
-//                            nrOfDevices++;
-//                        }
-//                    }
-//                }
-//            };
-
-
-//    public static String[] scanReturn() {
-//        m_instance.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-//        if(m_instance.bluetoothAdapter.isEnabled()) {
-
-//            IntentFilter filter = new IntentFilter();
-//            m_instance.bluetoothAdapter.startDiscovery();
-
-//            filter.addAction(BluetoothDevice.ACTION_FOUND);
-//            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-//            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-//            m_instance.registerReceiver(m_instance.mReceiver, filter);
-
-//            while(searching);
-//            searching = true;
-//        }
-
-//            if(nrOfDevices > 0){
-//                sendList = new String[nrOfDevices];
-//                System.out.println("nrOfDevices: " + nrOfDevices);
-//                for(int i=0;i<nrOfDevices;i++) {
-//                    System.out.println("Device name: "+devicesFound[i]);
-//                    sendList[i] = devicesFound[i];
-//                }
-
-//                System.out.println("Device 0: " + sendList[0]);
-//            } else {
-//                sendList = new String[1];
-//                sendList[0] = "No devices";
-//            }
-//            nrOfDevices = 0;
-//            deviceNumber = 0;
-//            return sendList;
-//    }
 
     public static void btON() {
         System.out.println(m_instance.bluetoothAdapter.isEnabled());
@@ -220,7 +158,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     }
 
     public static int updateHeartRate() {
-        String fromNative = natives.print();
+//        String fromNative = natives.print();
         return heartRateVal;
     }
 
@@ -336,10 +274,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
         private void readNextSensor(BluetoothGattCharacteristic characteristic) {
             System.out.println("Read next sensor");
-
-//            BluetoothGattCharacteristic characteristic;
-//            characteristic = gatt.getService(HEART_RATE_SERVICE).getCharacteristic(HEART_RATE_MEASUREMENT);
-
             System.out.println("read charac: " + mBluetoothGatt.readCharacteristic(characteristic));
         }
 
@@ -389,11 +323,10 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 System.out.println("Write successful");
             }
             if(HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-                readNextSensor(characteristic);
+                readCharacteristic(characteristic);
             } else if(ECG_WRITE_CHARACTERISTIC.equals(characteristic.getUuid())) {
                 System.out.println("ECG charac written!");
             }
-
         }
 
         @Override
@@ -407,7 +340,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 m_instance.mBluetoothGatt.writeCharacteristic(turnOnMeasure);
             }
         }
-
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
@@ -478,7 +410,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
 //                sendList = processScanResult(devicesFound);
                 scanning = false;
-//                MyJavaNatives.sendScanResult(sendList);
                 nrOfDevices = 0;
 
             }

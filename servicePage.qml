@@ -68,8 +68,6 @@ Rectangle {
         MouseArea{
             id: disconnectMouseArea
             anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-            //onClicked handles valid mouse button clicks
-            //onClicked: console.log(onLabel.text + " clicked" )
             onPressed: disconnectButton.scale = 0.7
             onReleased: disconnectButton.scale = 1.0
             onClicked: {
@@ -84,7 +82,8 @@ Rectangle {
         model: generator.serviceList
         width: parent.width-40
         height: parent.height*0.6
-        boundsBehavior: Flickable.StopAtBounds
+        clip: true
+
         anchors {
             left: parent.left;
             top: disconnectButton.bottom;
