@@ -13,6 +13,7 @@
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 #include "mythread.h"
+#include "jnihealthyway.h"
 
 
 class HealthyWayFunctions : public QObject
@@ -22,6 +23,9 @@ class HealthyWayFunctions : public QObject
     Q_PROPERTY(QVariant serviceList READ getServiceList NOTIFY serviceListChanged)
     Q_PROPERTY(QVariant deviceList READ getDeviceList NOTIFY deviceListChanged)
     Q_PROPERTY(QVariant bleData READ getBleData NOTIFY bleDataChanged)
+    Q_PROPERTY(int experiment READ experiment NOTIFY experimentChanged)
+    Q_PROPERTY(int experimentY READ experimentY NOTIFY experimentYChanged)
+
 
 public:
     // QObjects are expected to support a parent/child hierarchy.  I've modified
@@ -42,12 +46,22 @@ public:
     Q_INVOKABLE void listServices();
     Q_INVOKABLE void getCharacteristicData(const int &deviceIndex);
 
-    Q_INVOKABLE void testThreads();
+    Q_INVOKABLE void startDataThread();
     Q_INVOKABLE void startScanThread();
 
     QVariant getServiceList();
     QVariant getDeviceList();
     QVariant getBleData();
+
+    int experiment() const
+    {
+        return m_experiment;
+    }
+
+    int experimentY() const
+    {
+        return m_experimentY;
+    }
 
 public slots:
     void scanLeDevices();
@@ -61,8 +75,11 @@ signals:
     void scanningStarted();
     void scanningStopped();
 
+    void experimentChanged();
+    void experimentYChanged();
+
 private:
-    int glob_characIndex=0;
+    int glob_characIndex = 0;
 
     QStringList m_services;
     QStringList m_devices;
@@ -70,6 +87,11 @@ private:
     QVariant m_serviceList;
     QVariant m_deviceList;
     QVariant m_bleData;
+
+    JNIHealthyWay *java = new JNIHealthyWay();
+
+    int m_experiment = 0;
+    int m_experimentY = 0;
 };
 
 

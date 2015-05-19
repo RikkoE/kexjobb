@@ -18,7 +18,7 @@ public:
 signals:
     // To communicate with Gui Thread
     // we need to emit a signal
-    void valueChanged(int);
+    void valueChanged();
 
 public slots:
 

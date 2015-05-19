@@ -70,8 +70,8 @@ Rectangle {
             onReleased: updateButton.scale = 1.0
             //onClicked handles valid mouse button clicks
             onClicked: {
-                generator.testThreads()
-//                generator.updateData();
+                generator.startDataThread()
+                graph.visible = true;
             }
         }
     }
@@ -111,6 +111,7 @@ Rectangle {
             //onClicked handles valid mouse button clicks
             onClicked: {
                 generator.disconnectNotification()
+                graph.visible = false;
                 pageLoader.source = "servicePage.qml"
             }
         }
@@ -129,6 +130,57 @@ Rectangle {
         }
         text: "Data: " + generator.bleData
         font.pixelSize: 160
+    }
+
+    Canvas {
+        id: graph
+        width: parent.width-40
+        height: parent.height*0.5
+        visible: false
+
+        anchors {
+            leftMargin: 20
+            left: parent.left
+            topMargin:20
+            top: dataValueLabel.bottom
+        }
+
+        property int linex: 0;
+        property int liney: 200;
+        property int count: 1;
+
+        Connections {
+            target: generator
+//            onBleDataChanged: {
+//                graph.requestPaint();
+//            }
+            onExperimentYChanged: {
+                graph.requestPaint();
+            }
+        }
+
+        onPaint: {
+            // Get drawing context
+            var context = graph.getContext("2d");
+
+            if(generator.experiment > count*(parent.width-40)) {
+                context.clearRect(0, 0, graph.width, graph.height);
+                linex = 0;
+                count += 1;
+                console.log("count: ",count);
+            }
+
+            context.beginPath();
+            context.lineWidth = 5;
+            context.moveTo(linex, liney);
+
+            linex = generator.experiment - (count-1)*(parent.width-40);
+            liney = generator.experimentY + 200;
+
+            context.strokeStyle = "red"
+            context.lineTo(linex, liney);
+            context.stroke();
+        }
     }
 }
 

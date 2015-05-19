@@ -6,7 +6,8 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android-sources
 
 SOURCES += main.cpp \
     healthywayfunctions.cpp \
-    mythread.cpp
+    mythread.cpp \
+    jnihealthyway.cpp
 
 RESOURCES += qml.qrc
 
@@ -18,11 +19,11 @@ include(deployment.pri)
 
 HEADERS += \
     healthywayfunctions.h \
-    mythread.h
+    mythread.h \
+    jnihealthyway.h
 
 OTHER_FILES += \
     android-sources/src/org/qtproject/example/notification/NotificationClient.java \
     android-sources/AndroidManifest.xml
 
-DISTFILES += \
-    android-sources/src/org/qtproject/example/notification/MyJavaNatives.java
+DISTFILES +=

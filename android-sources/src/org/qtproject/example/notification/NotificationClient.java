@@ -63,9 +63,6 @@ import java.util.ArrayList;
 
 public class NotificationClient extends org.qtproject.qt5.android.bindings.QtActivity
 {
-
-    private static MyJavaNatives natives = new MyJavaNatives();
-
     private static NotificationClient m_instance;
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -123,8 +120,8 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         System.out.println(m_instance.bluetoothAdapter.isEnabled());
         if (!m_instance.bluetoothAdapter.isEnabled()) {
             System.out.println("Turning bluetooth on");
-//             m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
-            m_instance.bluetoothAdapter.enable();
+            m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
+//            m_instance.bluetoothAdapter.enable();
         }
     }
 
@@ -235,8 +232,14 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             String manufacName[] = {glob_manufacturerName};
             return manufacName;
         } else if(knownServices.get(characteristicWanted).equals("ECG measurement")) {
-            String ecgTimeStamp[] = {Integer.toString(glob_ecgTimeStamp)};
-            return ecgTimeStamp;
+            String ecgData[] = new String[7];
+            ecgData[0] = Integer.toString(glob_ecgTimeStamp);
+//            System.out.println("ECG DATA " + Arrays.toString(ecgData));
+            for(int i = 1; i < 7; i++) {
+//                System.out.println("ECG DATA " + Arrays.toString(ecgData));
+                ecgData[i] = Integer.toString(glob_ecgDataArray[i-1]);
+            }
+            return ecgData;
         } else {
             String defaultSend[] = {"Data not available"};
             System.out.println("Data not available");
@@ -289,14 +292,14 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
 //                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
                 glob_ecgTimeStamp = getIntSixteen(bytes,0);
-                System.out.println("Timestamp: " + glob_ecgTimeStamp);
+//                System.out.println("Timestamp: " + glob_ecgTimeStamp);
 
                 int offset = 2;
 
                 for(int i = 0; i < glob_ecgDataArray.length; i++) {
 //                    glob_ecgDataArray[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
                     glob_ecgDataArray[i] = getIntTwentyFour(bytes, offset);
-                    System.out.println("Sample " + (i+1) + ": " + glob_ecgDataArray[i]);
+//                    System.out.println("Sample " + (i+1) + ": " + glob_ecgDataArray[i]);
                     offset += 3;
                 }
 
@@ -400,31 +403,30 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static boolean scanning = true;
 
     public static void /*String[]*/ scanLeDevices() {
-        sendList = null;
-//        System.out.println("Before handler");
-        scanning = true;
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Stopping scan");
-                m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
-//                sendList = processScanResult(devicesFound);
-                scanning = false;
-                nrOfDevices = 0;
-
-            }
-        }, SCAN_PERIOD);
-        System.out.println("Start scanning");
-//        uuids[0] = HEART_RATE_SERVICE;
-        m_instance.bluetoothAdapter.startLeScan(m_instance.mLeScanCallback);
-//        while(scanning);
-//        System.out.println("Send list: " + Arrays.toString(sendList));
-//        return sendList;
+        if(m_instance.bluetoothAdapter.isEnabled()) {
+            sendList = null;
+            scanning = true;
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Stopping scan");
+                    m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
+                    scanning = false;
+                    nrOfDevices = 0;
+                }
+            }, SCAN_PERIOD);
+            System.out.println("Start scanning");
+            m_instance.bluetoothAdapter.startLeScan(m_instance.mLeScanCallback);
+        } else {
+            scanning = false;
+            btON();
+        }
     }
 
     public static String[] getDeviceList() {
         sendList = processScanResult(devicesFound);
         System.out.println("Send list: " + Arrays.toString(sendList));
+        System.out.println("Enabled status: " + m_instance.bluetoothAdapter.isEnabled());
         return sendList;
     }
 
@@ -440,11 +442,12 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 tempArray[i] = foundDevices[i];
             }
         } else {
-            tempArray = new String[1];
-            tempArray[0] = "No devices";
+            tempArray = new String[0];
+//            tempArray[0] = "No devices";
         }
+        System.out.println("Devices list: " + Arrays.toString(foundDevices));
 //        nrOfDevices = 0;
-        deviceNumber = 0;
+        deviceNumber = 0; //CHECK THIS LINE LATER FOR ERROR WHEN SCANNING
         return tempArray;
     }
 
@@ -459,13 +462,10 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 //                        sb.append(String.format("%02X ", b));
 //                    }
 
-            if(device.getName().equals("null") || device.getName() == "") {
-            } else {
-                devicesFound[deviceNumber] = device.getName();
-                devicesFoundAddresses[deviceNumber] = device.getAddress();
-                deviceNumber++;
-                nrOfDevices++;
-            }
+            devicesFound[nrOfDevices] = device.getName();
+            devicesFoundAddresses[nrOfDevices] = device.getAddress();
+            deviceNumber++;
+            nrOfDevices++;
 
             System.out.println("Device name: " + device.getName());
             System.out.println("Device address: " + device.getAddress());
