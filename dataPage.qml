@@ -70,8 +70,8 @@ Rectangle {
             onReleased: updateButton.scale = 1.0
             //onClicked handles valid mouse button clicks
             onClicked: {
-                generator.startDataThread()
-                graph.visible = true;
+//                generator.startDataThread()
+//                graph.visible = true;
             }
         }
     }
@@ -112,6 +112,7 @@ Rectangle {
             onClicked: {
                 generator.disconnectNotification()
                 graph.visible = false;
+                batteryIndicator.visible = false;
                 pageLoader.source = "servicePage.qml"
             }
         }
@@ -130,6 +131,16 @@ Rectangle {
         }
         text: "Data: " + generator.bleData
         font.pixelSize: 160
+    }
+
+    Connections {
+        target: generator
+        onShowEcgCanvas: {
+            graph.visible = true;
+        }
+        onShowBatteryCanvas: {
+            batteryIndicator.visible = true;
+        }
     }
 
     Canvas {
@@ -151,9 +162,6 @@ Rectangle {
 
         Connections {
             target: generator
-//            onBleDataChanged: {
-//                graph.requestPaint();
-//            }
             onExperimentYChanged: {
                 graph.requestPaint();
             }
@@ -167,7 +175,6 @@ Rectangle {
                 context.clearRect(0, 0, graph.width, graph.height);
                 linex = 0;
                 count += 1;
-                console.log("count: ",count);
             }
 
             context.beginPath();
@@ -179,6 +186,44 @@ Rectangle {
 
             context.strokeStyle = "red"
             context.lineTo(linex, liney);
+            context.stroke();
+        }
+    }
+
+    Canvas {
+        id: batteryIndicator
+        width: parent.width-40
+        height: parent.height*0.5
+        visible: false
+
+        anchors {
+            leftMargin: 20
+            left: parent.left
+            topMargin:20
+            top: dataValueLabel.bottom
+        }
+
+        property int batteryPercent: (generator.batteryLevel/100)*batteryIndicator.width;
+
+        Connections {
+            target: generator
+            onBatteryLevelChanged: {
+                batteryIndicator.requestPaint();
+            }
+        }
+
+        onPaint: {
+            // Get drawing context
+            var context = batteryIndicator.getContext("2d");
+
+            context.clearRect(0, 0, batteryIndicator.width, batteryIndicator.height);
+
+            context.beginPath();
+            context.lineWidth = 30;
+            context.moveTo(0, 300);
+
+            context.strokeStyle = "green"
+            context.lineTo(batteryPercent, 300);
             context.stroke();
         }
     }

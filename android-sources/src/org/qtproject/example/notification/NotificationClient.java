@@ -92,7 +92,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static int glob_refVoltage = 0;
     private static int glob_samplingRate = 0;
     private static int glob_batteryLevel = 0;
-    private static int[] glob_ecgDataArray = new int[6];
+    private static int[] glob_ecgDataArray = new int[7];
     private static String glob_manufacturerName;
     private static UUID[] uuids = new UUID[1];
     private static String[] servicesList;
@@ -103,6 +103,9 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static String[] devicesFoundAddresses = new String[20];
     private static String[] sendList;
     private static boolean doneConnecting = false;
+    private static boolean notReadyToSend = false;
+    private static boolean ecgNotifyDisabled = true;
+    private static boolean waitForData = true;
 
     static int deviceNumber = 0;
     static int nrOfDevices = 0;
@@ -168,8 +171,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         return glob_batteryLevel;
     }
 
-
-
     public static void getCharacData(int characChosen) {
         if(knownServices.get(characChosen).equals("Heart rate measurement")) {
             handleServiceConnection(0);
@@ -212,12 +213,14 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         }
     }
 
-    public static void disconnectNotification(int notificationIndex) {
-        if(knownServices.get(notificationIndex).equals("ECG measurement")) {
+    public static void disconnectNotification(String characteristic) {
+        System.out.println("DISCONNECTING SERVICE");
+        if(characteristic.equals("ECG measurement")) {
             BluetoothGattCharacteristic turnOffMeasure = m_instance.mBluetoothGatt.getService(ECG_SERVICE).getCharacteristic(ECG_WRITE_CHARACTERISTIC);
             byte[] value = {(byte) 0x11};
             turnOffMeasure.setValue(value);
             m_instance.mBluetoothGatt.writeCharacteristic(turnOffMeasure);
+            ecgNotifyDisabled = true;
         } else {
             System.out.println("Not a notification characteristic");
         }
@@ -246,6 +249,33 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             return defaultSend;
         }
     }
+
+    public static int batteryLevel() {
+        BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
+        m_instance.readCharacteristic(batteryCharac);
+
+        return glob_batteryLevel;
+    }
+
+    public static String manufacName() {
+        BluetoothGattCharacteristic manufacCharac = m_instance.mBluetoothGatt.getService(DEVICE_INFORMATION_SERVICE).getCharacteristic(DEVICE_NAME_STRING);
+        m_instance.readCharacteristic(manufacCharac);
+
+        return glob_manufacturerName;
+    }
+
+    public static int[] getEcgData() {
+        if(ecgNotifyDisabled) {
+            BluetoothGattCharacteristic ecgMeasure = m_instance.mBluetoothGatt.getService(ECG_SERVICE).getCharacteristic(ECG_MEASUREMENT_CHARACTERISTIC);
+            m_instance.setNotify(ecgMeasure);
+
+            ecgNotifyDisabled = false;
+            waitForData = true;
+            while(waitForData);
+        }
+        return glob_ecgDataArray;
+    }
+
 
     public void setNotify(BluetoothGattCharacteristic characteristic) {
         System.out.println("Setting notify on heart rate");
@@ -290,19 +320,14 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 byte[] bytes;
                 bytes = characteristic.getValue();
 
-//                glob_ecgTimeStamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
-                glob_ecgTimeStamp = getIntSixteen(bytes,0);
-//                System.out.println("Timestamp: " + glob_ecgTimeStamp);
+                glob_ecgDataArray[0] = getIntSixteen(bytes,0);
 
                 int offset = 2;
-
-                for(int i = 0; i < glob_ecgDataArray.length; i++) {
-//                    glob_ecgDataArray[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+                for(int i = 1; i < glob_ecgDataArray.length; i++) {
                     glob_ecgDataArray[i] = getIntTwentyFour(bytes, offset);
-//                    System.out.println("Sample " + (i+1) + ": " + glob_ecgDataArray[i]);
                     offset += 3;
                 }
-
+                waitForData = false;
             } else {
                 System.out.println("Characteristic not found");
             }
@@ -354,10 +379,14 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                 final int batteryLevel = characteristic.getIntValue(format, 0);
                 glob_batteryLevel = batteryLevel;
                 System.out.println("Battery level: " + batteryLevel);
+
+                notReadyToSend = false;
             } else if(status == BluetoothGatt.GATT_SUCCESS && DEVICE_NAME_STRING.equals(characteristic.getUuid())) {
                 String manufacturer = characteristic.getStringValue(0);
                 glob_manufacturerName = manufacturer;
                 System.out.println("Manufacturer: " + manufacturer);
+
+                notReadyToSend = false;
             } else if(status == BluetoothGatt.GATT_SUCCESS && ECG_SAMPLING_RATE_REF_VOLTAGE.equals(characteristic.getUuid())) {
                 int format = -1;
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;

@@ -15,7 +15,7 @@ public:
     void connectDevice(QString deviceName);
     void disconnectDevice();
     void scanForDevices();
-    void disconnectDataStream(int deviceIndex);
+    void disconnectDataStream(QString characteristic);
     void turnBluetoothOff();
     void turnBluetoothOn();
     void connectService(int serviceIndex);
@@ -27,6 +27,13 @@ public:
     QStringList getDeviceData(int serviceIndex);
 
     int deviceDataExperiment(int serviceIndex);
+
+    int getBatteryLevel();
+    QString getManufacturerName();
+    int *getEcgData();
+
+private:
+    int ecgData[7];
 
 };
 

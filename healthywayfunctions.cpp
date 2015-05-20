@@ -48,14 +48,44 @@ void HealthyWayFunctions::listServices()
 
 void HealthyWayFunctions::getCharacteristicData(const int &deviceIndex)
 {
-    QString chosenCharacteristic = m_services.at(deviceIndex);
-    glob_characIndex = deviceIndex;
+    chosenCharacteristic = m_services.at(deviceIndex);
     qDebug() << "Chosen characteristic: " << chosenCharacteristic;
 
-    java->connectService(deviceIndex);
-    QVariant qv(" ");
-    m_bleData = qv;
-    emit bleDataChanged();
+    if(chosenCharacteristic == "ECG measurement") {
+        emit showEcgCanvas();
+    } else if(chosenCharacteristic == "Battery level indicator") {
+        emit showBatteryCanvas();
+    }
+
+
+    startDataThread();
+
+//    if(chosenCharacteristic == "Battery level indicator") {
+//        qDebug() << "Battery chosen";
+//        int batteryLevel = 0;
+//        batteryLevel = java->getBatteryLevel();
+//        qDebug() << "Battery level: " << batteryLevel;
+//    } else if(chosenCharacteristic == "Manufacturer name") {
+//        qDebug() << "Name chosen";
+//        QString manufacurerName;
+//        manufacurerName = java->getManufacturerName();
+//        qDebug() << "Manufacturer name: " << manufacurerName;
+//    } else if(chosenCharacteristic == "ECG measurement") {
+//        qDebug() << "ECG chosen";
+//        int *ecgData;
+//        ecgData = java->getEcgData();
+//        int ecgTimeStamp = ecgData[0];
+//        qDebug() << "ECG time stamp: " << ecgTimeStamp;
+//        for(int i = 1; i < 7; i++) {
+//            qDebug() << "ECG sample: " << ecgData[i];
+//        }
+//    } else {
+//        qDebug() << "CHARACTERISTIC NOT FOUND";
+//    }
+//    glob_characIndex = deviceIndex;
+//    QVariant qv(" ");
+//    m_bleData = qv;
+//    emit bleDataChanged();
 }
 
 void HealthyWayFunctions::disconnectNotification()
@@ -63,7 +93,7 @@ void HealthyWayFunctions::disconnectNotification()
     m_experiment = 0;
     m_experimentY = 0;
     dataThread->Stop = true;
-    java->disconnectDataStream(glob_characIndex);
+    java->disconnectDataStream(chosenCharacteristic);
 }
 
 void HealthyWayFunctions::startDataThread()
@@ -83,34 +113,86 @@ void HealthyWayFunctions::startScanThread()
 
 void HealthyWayFunctions::updateData()
 {
-    QStringList dataList;
-    dataList = java->getDeviceData(glob_characIndex);
+    if(chosenCharacteristic == "Battery level indicator") {
+        qDebug() << "Battery chosen";
+        int batteryLevel = 0;
+        batteryLevel = java->getBatteryLevel();
+        qDebug() << "Battery level: " << batteryLevel;
 
-    qDebug() << "TIME STAMP: " << dataList.at(0);
+        m_batteryLevel = batteryLevel;
+        emit batteryLevelChanged();
 
-    int temp = dataList.at(0).toInt();
-    int divider = 10/6;
+        m_bleData = QVariant::fromValue(batteryLevel);
 
-//    m_experiment = temp;
+        emit bleDataChanged();
 
-//    emit experimentChanged();
+        emit showBatteryCanvas();
 
-    for(int i = 1; i < dataList.length(); i++) {
-        qDebug() << "sample in int: " << dataList.at(i).toInt();
-//        if(dataList.at(i).toInt() > 1400000) {
-//            m_experimentY = 300;
+    } else if(chosenCharacteristic == "Manufacturer name") {
+        qDebug() << "Name chosen";
+        QString manufacurerName;
+        manufacurerName = java->getManufacturerName();
+        qDebug() << "Manufacturer name: " << manufacurerName;
+
+
+
+        m_bleData = QVariant::fromValue(manufacurerName);
+
+        emit bleDataChanged();
+
+    } else if(chosenCharacteristic == "ECG measurement") {
+        qDebug() << "ECG chosen";
+//        int ecgData[7];
+        int *ecgData;
+        ecgData = java->getEcgData();
+        int ecgTimeStamp = ecgData[0];
+        qDebug() << "ECG time stamp: " << ecgTimeStamp;
+//        for(int i = 1; i < 7; i++) {
+//            qDebug() << "ECG sample: " << ecgData[i];
+//        }
+
+        int timeDivider = 10/6;
+
+        if(ecgTimeStamp != glob_timeStamp) {
+            for(int i = 1; i < 7; i++) {
+                qDebug() << "sample in int: " << ecgData[i];
+                m_experimentY = ecgData[i]/10000;
+                m_experiment = ecgTimeStamp*10 + (i-1)*timeDivider;
+                emit experimentYChanged();
+            }
+            glob_timeStamp = ecgTimeStamp;
+        }
+
+        m_bleData = QVariant::fromValue(ecgTimeStamp);
+
+        emit bleDataChanged();
+
+        emit showEcgCanvas();
+
+    } else {
+        qDebug() << "CHARACTERISTIC NOT FOUND";
+    }
+//    QStringList dataList;
+//    dataList = java->getDeviceData(glob_characIndex);
+
+//    qDebug() << "TIME STAMP: " << dataList.at(0);
+
+//    int temp = dataList.at(0).toInt();
+//    int divider = 10/6;
+
+//    if(temp != glob_timeStamp) {
+//        for(int i = 1; i < dataList.length(); i++) {
+//            qDebug() << "sample in int: " << dataList.at(i).toInt();
+//            m_experimentY = (dataList.at(i).toInt())/10000;
 //            m_experiment = temp*10 + (i-1)*divider;
 //            emit experimentYChanged();
-//        } else {
-            m_experimentY = (dataList.at(i).toInt())/10000;
-            m_experiment = temp*10 + (i-1)*divider;
-            emit experimentYChanged();
 //        }
-    }
+//        glob_timeStamp = temp;
+//    }
 
-    m_bleData = QVariant::fromValue(dataList.at(0));
+//    m_bleData = QVariant::fromValue(dataList.at(0));
 
-    emit bleDataChanged();
+//    emit bleDataChanged();
 }
 
 QVariant HealthyWayFunctions::getServiceList()

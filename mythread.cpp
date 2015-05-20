@@ -13,7 +13,7 @@ void MyThread::run()
 
     while(!(this->Stop)){
         emit valueChanged();
-        this->msleep(50);
+        this->msleep(40);
     }
     qDebug() << "Stop value: " << this->Stop;
 

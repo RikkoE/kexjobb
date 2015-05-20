@@ -25,6 +25,7 @@ class HealthyWayFunctions : public QObject
     Q_PROPERTY(QVariant bleData READ getBleData NOTIFY bleDataChanged)
     Q_PROPERTY(int experiment READ experiment NOTIFY experimentChanged)
     Q_PROPERTY(int experimentY READ experimentY NOTIFY experimentYChanged)
+    Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
 
 
 public:
@@ -63,6 +64,11 @@ public:
         return m_experimentY;
     }
 
+    int batteryLevel() const
+    {
+        return m_batteryLevel;
+    }
+
 public slots:
     void scanLeDevices();
     void updateData();
@@ -78,20 +84,29 @@ signals:
     void experimentChanged();
     void experimentYChanged();
 
+    void showEcgCanvas();
+    void showBatteryCanvas();
+
+    void batteryLevelChanged();
+
 private:
     int glob_characIndex = 0;
+    int glob_timeStamp = -1;
 
     QStringList m_services;
     QStringList m_devices;
 
     QVariant m_serviceList;
     QVariant m_deviceList;
-    QVariant m_bleData;
+    QVariant m_bleData = " ";
+
+    QString chosenCharacteristic;
 
     JNIHealthyWay *java = new JNIHealthyWay();
 
     int m_experiment = 0;
     int m_experimentY = 0;
+    int m_batteryLevel;
 };
 
 

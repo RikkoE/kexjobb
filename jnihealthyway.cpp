@@ -31,12 +31,14 @@ void JNIHealthyWay::scanForDevices()
                                               "scanLeDevices");
 }
 
-void JNIHealthyWay::disconnectDataStream(int deviceIndex)
+void JNIHealthyWay::disconnectDataStream(QString characteristic)
 {
+    qDebug() << "Disconnect service: " << characteristic;
+    QAndroidJniObject javaString = QAndroidJniObject::fromString(characteristic);
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "disconnectNotification",
-                                              "(I)V",
-                                              deviceIndex);
+                                              "(Ljava/lang/String;)V",
+                                              javaString.object<jstring>());
 }
 
 void JNIHealthyWay::turnBluetoothOff()
@@ -157,6 +159,52 @@ int JNIHealthyWay::deviceDataExperiment(int serviceIndex)
                                                        serviceIndex);
 
     return x;
+}
+
+int JNIHealthyWay::getBatteryLevel()
+{
+    int batteryLevel;
+
+    jint javaBatt = QAndroidJniObject::callStaticMethod<jint>("org/qtproject/example/notification/NotificationClient",
+                                                       "batteryLevel");
+    batteryLevel = (int) javaBatt;
+
+    return batteryLevel;
+}
+
+QString JNIHealthyWay::getManufacturerName()
+{
+    QString manufacturerName;
+
+    QAndroidJniObject fromJava = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
+                                                                           "manufacName",
+                                                                           "()Ljava/lang/String;");
+    manufacturerName = fromJava.toString();
+
+    return manufacturerName;
+}
+
+int *JNIHealthyWay::getEcgData()
+{
+    QAndroidJniEnvironment env;
+
+    QAndroidJniObject javaArray = QAndroidJniObject::callStaticObjectMethod<jintArray>("org/qtproject/example/notification/NotificationClient",
+                                                    "getEcgData");
+
+    jintArray intArray = javaArray.object<jintArray>();
+
+    int size = env->GetArrayLength(intArray);
+
+    jint *temp = env->GetIntArrayElements(intArray, 0);
+
+    for (int i = 0; i < size; i++)
+    {
+        ecgData[i] = (int) temp[i];
+    }
+
+    env->ReleaseIntArrayElements(intArray, temp, 0);
+
+    return ecgData;
 }
 
 
