@@ -215,19 +215,28 @@ void HealthyWayFunctions::scanLeDevices()
     bool scanning = java->scanningStatus();
 
     if(!scanning) {
+        m_devices.clear();
+
+        QStringList listOfDevices;
+        listOfDevices = java->listDevices();
+
+        m_devices = listOfDevices;
+
+        emit deviceListChanged();
+
         scanThread->Stop = true;
         emit scanningStopped();
         return;
     }
 
-    m_devices.clear();
+//    m_devices.clear();
 
-    QStringList listOfDevices;
-    listOfDevices = java->listDevices();
+//    QStringList listOfDevices;
+//    listOfDevices = java->listDevices();
 
-    m_devices = listOfDevices;
+//    m_devices = listOfDevices;
 
-    emit deviceListChanged();
+//    emit deviceListChanged();
 }
 
 void HealthyWayFunctions::onButtonClicked()

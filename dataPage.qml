@@ -167,6 +167,10 @@ Rectangle {
             }
         }
 
+        transform: Scale {
+            yScale: 4
+        }
+
         onPaint: {
             // Get drawing context
             var context = graph.getContext("2d");
@@ -178,11 +182,11 @@ Rectangle {
             }
 
             context.beginPath();
-            context.lineWidth = 5;
+            context.lineWidth = 1;
             context.moveTo(linex, liney);
 
             linex = generator.experiment - (count-1)*(parent.width-40);
-            liney = generator.experimentY + 200;
+            liney = generator.experimentY;
 
             context.strokeStyle = "red"
             context.lineTo(linex, liney);
@@ -219,10 +223,15 @@ Rectangle {
             context.clearRect(0, 0, batteryIndicator.width, batteryIndicator.height);
 
             context.beginPath();
-            context.lineWidth = 30;
+            context.lineWidth = 50;
             context.moveTo(0, 300);
-
-            context.strokeStyle = "green"
+            if(generator.batteryLevel > 50) {
+                context.strokeStyle = "green"
+            } else if(generator.batteryLevel > 20) {
+                context.strokeStyle = "yellow"
+            } else {
+                context.strokeStyle = "red"
+            }
             context.lineTo(batteryPercent, 300);
             context.stroke();
         }

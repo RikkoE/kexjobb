@@ -100,6 +100,9 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
     private static String[] devicesFound = new String[20];
+    private static List<String> devices = new ArrayList<String>();
+    private static List<String> addresses = new ArrayList<String>();
+
     private static String[] devicesFoundAddresses = new String[20];
     private static String[] sendList;
     private static boolean doneConnecting = false;
@@ -143,13 +146,17 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         int i;
         doneConnecting = false;
         String deviceAddress = "";
-        for(i = 0; i < sendList.length; i++){
-            if(devicesFound[i].equals(deviceName)) {
-                System.out.println("Found device!");
-                deviceAddress = devicesFoundAddresses[i];
-                break;
-            }
-        }
+
+        int index = devices.indexOf(deviceName);
+        deviceAddress = addresses.get(index);
+
+//        for(i = 0; i < sendList.length; i++){
+//            if(devicesFound[i].equals(deviceName)) {
+//                System.out.println("Found device!");
+//                deviceAddress = devicesFoundAddresses[i];
+//                break;
+//            }
+//        }
 
         System.out.println("Connecting to " + deviceName + " with address " + deviceAddress);
 
@@ -171,47 +178,47 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         return glob_batteryLevel;
     }
 
-    public static void getCharacData(int characChosen) {
-        if(knownServices.get(characChosen).equals("Heart rate measurement")) {
-            handleServiceConnection(0);
-        } else if(knownServices.get(characChosen).equals("Battery level indicator")) {
-            handleServiceConnection(1);
-        } else if(knownServices.get(characChosen).equals("Manufacturer name")) {
-            handleServiceConnection(2);
-        } else if(knownServices.get(characChosen).equals("ECG measurement")) {
-            handleServiceConnection(3);
-        } else {
-            System.out.println("Characteristic not found");
-        }
-    }
+//    public static void getCharacData(int characChosen) {
+//        if(knownServices.get(characChosen).equals("Heart rate measurement")) {
+//            handleServiceConnection(0);
+//        } else if(knownServices.get(characChosen).equals("Battery level indicator")) {
+//            handleServiceConnection(1);
+//        } else if(knownServices.get(characChosen).equals("Manufacturer name")) {
+//            handleServiceConnection(2);
+//        } else if(knownServices.get(characChosen).equals("ECG measurement")) {
+//            handleServiceConnection(3);
+//        } else {
+//            System.out.println("Characteristic not found");
+//        }
+//    }
 
-    public static void handleServiceConnection(int service) {
-        switch(service) {
-            case 0:
-                System.out.println("Heart");
-                BluetoothGattCharacteristic heartCharac = m_instance.mBluetoothGatt.getService(HEART_RATE_SERVICE).getCharacteristic(HEART_RATE_MEASUREMENT);
-                m_instance.setNotify(heartCharac);
-                break;
-            case 1:
-                System.out.println("Battery");
-                BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
-                m_instance.readCharacteristic(batteryCharac);
-                break;
-            case 2:
-                System.out.println("Manufacturer name");
-                BluetoothGattCharacteristic manufacCharac = m_instance.mBluetoothGatt.getService(DEVICE_INFORMATION_SERVICE).getCharacteristic(DEVICE_NAME_STRING);
-                m_instance.readCharacteristic(manufacCharac);
-                break;
-            case 3:
-                System.out.println("ECG");
-                BluetoothGattCharacteristic ecgMeasure = m_instance.mBluetoothGatt.getService(ECG_SERVICE).getCharacteristic(ECG_MEASUREMENT_CHARACTERISTIC);
-                m_instance.setNotify(ecgMeasure);
-                break;
-            default:
-                System.out.println("Invalid service");
-                break;
-        }
-    }
+//    public static void handleServiceConnection(int service) {
+//        switch(service) {
+//            case 0:
+//                System.out.println("Heart");
+//                BluetoothGattCharacteristic heartCharac = m_instance.mBluetoothGatt.getService(HEART_RATE_SERVICE).getCharacteristic(HEART_RATE_MEASUREMENT);
+//                m_instance.setNotify(heartCharac);
+//                break;
+//            case 1:
+//                System.out.println("Battery");
+//                BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
+//                m_instance.readCharacteristic(batteryCharac);
+//                break;
+//            case 2:
+//                System.out.println("Manufacturer name");
+//                BluetoothGattCharacteristic manufacCharac = m_instance.mBluetoothGatt.getService(DEVICE_INFORMATION_SERVICE).getCharacteristic(DEVICE_NAME_STRING);
+//                m_instance.readCharacteristic(manufacCharac);
+//                break;
+//            case 3:
+//                System.out.println("ECG");
+//                BluetoothGattCharacteristic ecgMeasure = m_instance.mBluetoothGatt.getService(ECG_SERVICE).getCharacteristic(ECG_MEASUREMENT_CHARACTERISTIC);
+//                m_instance.setNotify(ecgMeasure);
+//                break;
+//            default:
+//                System.out.println("Invalid service");
+//                break;
+//        }
+//    }
 
     public static void disconnectNotification(String characteristic) {
         System.out.println("DISCONNECTING SERVICE");
@@ -226,29 +233,29 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         }
     }
 
-    public static String[] getData(int characteristicWanted) {
-        if(knownServices.get(characteristicWanted).equals("Battery level indicator")) {
-            getCharacData(characteristicWanted);
-            String batteryLevel[] = {Integer.toString(glob_batteryLevel)};
-            return batteryLevel;
-        } else if(knownServices.get(characteristicWanted).equals("Manufacturer name")) {
-            String manufacName[] = {glob_manufacturerName};
-            return manufacName;
-        } else if(knownServices.get(characteristicWanted).equals("ECG measurement")) {
-            String ecgData[] = new String[7];
-            ecgData[0] = Integer.toString(glob_ecgTimeStamp);
-//            System.out.println("ECG DATA " + Arrays.toString(ecgData));
-            for(int i = 1; i < 7; i++) {
-//                System.out.println("ECG DATA " + Arrays.toString(ecgData));
-                ecgData[i] = Integer.toString(glob_ecgDataArray[i-1]);
-            }
-            return ecgData;
-        } else {
-            String defaultSend[] = {"Data not available"};
-            System.out.println("Data not available");
-            return defaultSend;
-        }
-    }
+//    public static String[] getData(int characteristicWanted) {
+//        if(knownServices.get(characteristicWanted).equals("Battery level indicator")) {
+//            getCharacData(characteristicWanted);
+//            String batteryLevel[] = {Integer.toString(glob_batteryLevel)};
+//            return batteryLevel;
+//        } else if(knownServices.get(characteristicWanted).equals("Manufacturer name")) {
+//            String manufacName[] = {glob_manufacturerName};
+//            return manufacName;
+//        } else if(knownServices.get(characteristicWanted).equals("ECG measurement")) {
+//            String ecgData[] = new String[7];
+//            ecgData[0] = Integer.toString(glob_ecgTimeStamp);
+////            System.out.println("ECG DATA " + Arrays.toString(ecgData));
+//            for(int i = 1; i < 7; i++) {
+////                System.out.println("ECG DATA " + Arrays.toString(ecgData));
+//                ecgData[i] = Integer.toString(glob_ecgDataArray[i-1]);
+//            }
+//            return ecgData;
+//        } else {
+//            String defaultSend[] = {"Data not available"};
+//            System.out.println("Data not available");
+//            return defaultSend;
+//        }
+//    }
 
     public static int batteryLevel() {
         BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
@@ -434,6 +441,8 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     public static void /*String[]*/ scanLeDevices() {
         if(m_instance.bluetoothAdapter.isEnabled()) {
             sendList = null;
+            devices.clear();
+            addresses.clear();
             scanning = true;
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -453,9 +462,11 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     }
 
     public static String[] getDeviceList() {
-        sendList = processScanResult(devicesFound);
-        System.out.println("Send list: " + Arrays.toString(sendList));
-        System.out.println("Enabled status: " + m_instance.bluetoothAdapter.isEnabled());
+//        sendList = processScanResult(devicesFound);
+//        System.out.println("Send list: " + Arrays.toString(sendList));
+//        System.out.println("Enabled status: " + m_instance.bluetoothAdapter.isEnabled());
+
+        sendList = devices.toArray(new String[devices.size()]);
         return sendList;
     }
 
@@ -490,6 +501,9 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 //                        length++;
 //                        sb.append(String.format("%02X ", b));
 //                    }
+
+            devices.add(device.getName());
+            addresses.add(device.getAddress());
 
             devicesFound[nrOfDevices] = device.getName();
             devicesFoundAddresses[nrOfDevices] = device.getAddress();
