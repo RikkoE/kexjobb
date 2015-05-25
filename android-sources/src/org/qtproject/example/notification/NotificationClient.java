@@ -65,7 +65,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 {
     private static NotificationClient m_instance;
 
-    private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
@@ -94,26 +93,22 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     private static int glob_batteryLevel = 0;
     private static int[] glob_ecgDataArray = new int[7];
     private static String glob_manufacturerName;
-    private static UUID[] uuids = new UUID[1];
     private static String[] servicesList;
 
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-    private static String[] devicesFound = new String[20];
     private static List<String> devices = new ArrayList<String>();
     private static List<String> addresses = new ArrayList<String>();
+    private static List<String> knownServices = new ArrayList<String>();
 
-    private static String[] devicesFoundAddresses = new String[20];
     private static String[] sendList;
     private static boolean doneConnecting = false;
     private static boolean notReadyToSend = false;
     private static boolean ecgNotifyDisabled = true;
     private static boolean waitForData = true;
 
-    static int deviceNumber = 0;
-    static int nrOfDevices = 0;
-
-    private static boolean searching = true;
+    private static Handler mHandler = new Handler();
+    private static boolean scanning = true;
 
     private static final String TAG = "Notification client";
 
@@ -124,101 +119,56 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
     public static void btON() {
         System.out.println(m_instance.bluetoothAdapter.isEnabled());
+        // Checks if the bluetooth module is on
         if (!m_instance.bluetoothAdapter.isEnabled()) {
             System.out.println("Turning bluetooth on");
+            // Sends a request to the screen so the user can decide to allow bluetooth or not
             m_instance.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
-//            m_instance.bluetoothAdapter.enable();
         }
     }
 
     public static void btOFF() {
         System.out.println("Turning bluetooth off");
+        // Turns off the bluetooth module
         m_instance.bluetoothAdapter.disable();
     }
 
     public static void disconnectDevice() {
+        // Disconnects the bluetooth low energy device
         m_instance.mBluetoothGatt.disconnect();
+        // Resets the BluetoothGatt to be able to connect to a new device
         m_instance.mBluetoothGatt = null;
+        // Clears the list of services for the device
         m_instance.knownServices.clear();
     }
 
     public static void connectDevice(String deviceName) {
         int i;
+        /* Sets the state of the connection to false to block calls to
+         * updateServices from returning until done */
         doneConnecting = false;
         String deviceAddress = "";
 
+        // Gets the index of the chosen device
         int index = devices.indexOf(deviceName);
+        // Gets the address (UUID) of the device
         deviceAddress = addresses.get(index);
-
-//        for(i = 0; i < sendList.length; i++){
-//            if(devicesFound[i].equals(deviceName)) {
-//                System.out.println("Found device!");
-//                deviceAddress = devicesFoundAddresses[i];
-//                break;
-//            }
-//        }
 
         System.out.println("Connecting to " + deviceName + " with address " + deviceAddress);
 
+        //
         final BluetoothDevice device = m_instance.bluetoothAdapter.getRemoteDevice(deviceAddress);
+        /* Calls the method that connects the host device to the ble device.
+         * The first parameter is the Context, the second sets autoconnect to
+         * false and the third connects a callback for the connection */
         m_instance.mBluetoothGatt = device.connectGatt(m_instance, false, m_instance.mGattCallback);
     }
 
-    public static int updateHeartRate() {
-//        String fromNative = natives.print();
-        return heartRateVal;
-    }
-
     public static String[] updateServices() {
+        // Locks the application to wait for the connection to be established
         while(!doneConnecting);
         return servicesList;
     }
-
-    public static int returnBatteryLevel() {
-        return glob_batteryLevel;
-    }
-
-//    public static void getCharacData(int characChosen) {
-//        if(knownServices.get(characChosen).equals("Heart rate measurement")) {
-//            handleServiceConnection(0);
-//        } else if(knownServices.get(characChosen).equals("Battery level indicator")) {
-//            handleServiceConnection(1);
-//        } else if(knownServices.get(characChosen).equals("Manufacturer name")) {
-//            handleServiceConnection(2);
-//        } else if(knownServices.get(characChosen).equals("ECG measurement")) {
-//            handleServiceConnection(3);
-//        } else {
-//            System.out.println("Characteristic not found");
-//        }
-//    }
-
-//    public static void handleServiceConnection(int service) {
-//        switch(service) {
-//            case 0:
-//                System.out.println("Heart");
-//                BluetoothGattCharacteristic heartCharac = m_instance.mBluetoothGatt.getService(HEART_RATE_SERVICE).getCharacteristic(HEART_RATE_MEASUREMENT);
-//                m_instance.setNotify(heartCharac);
-//                break;
-//            case 1:
-//                System.out.println("Battery");
-//                BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
-//                m_instance.readCharacteristic(batteryCharac);
-//                break;
-//            case 2:
-//                System.out.println("Manufacturer name");
-//                BluetoothGattCharacteristic manufacCharac = m_instance.mBluetoothGatt.getService(DEVICE_INFORMATION_SERVICE).getCharacteristic(DEVICE_NAME_STRING);
-//                m_instance.readCharacteristic(manufacCharac);
-//                break;
-//            case 3:
-//                System.out.println("ECG");
-//                BluetoothGattCharacteristic ecgMeasure = m_instance.mBluetoothGatt.getService(ECG_SERVICE).getCharacteristic(ECG_MEASUREMENT_CHARACTERISTIC);
-//                m_instance.setNotify(ecgMeasure);
-//                break;
-//            default:
-//                System.out.println("Invalid service");
-//                break;
-//        }
-//    }
 
     public static void disconnectNotification(String characteristic) {
         System.out.println("DISCONNECTING SERVICE");
@@ -232,30 +182,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
             System.out.println("Not a notification characteristic");
         }
     }
-
-//    public static String[] getData(int characteristicWanted) {
-//        if(knownServices.get(characteristicWanted).equals("Battery level indicator")) {
-//            getCharacData(characteristicWanted);
-//            String batteryLevel[] = {Integer.toString(glob_batteryLevel)};
-//            return batteryLevel;
-//        } else if(knownServices.get(characteristicWanted).equals("Manufacturer name")) {
-//            String manufacName[] = {glob_manufacturerName};
-//            return manufacName;
-//        } else if(knownServices.get(characteristicWanted).equals("ECG measurement")) {
-//            String ecgData[] = new String[7];
-//            ecgData[0] = Integer.toString(glob_ecgTimeStamp);
-////            System.out.println("ECG DATA " + Arrays.toString(ecgData));
-//            for(int i = 1; i < 7; i++) {
-////                System.out.println("ECG DATA " + Arrays.toString(ecgData));
-//                ecgData[i] = Integer.toString(glob_ecgDataArray[i-1]);
-//            }
-//            return ecgData;
-//        } else {
-//            String defaultSend[] = {"Data not available"};
-//            System.out.println("Data not available");
-//            return defaultSend;
-//        }
-//    }
 
     public static int batteryLevel() {
         BluetoothGattCharacteristic batteryCharac = m_instance.mBluetoothGatt.getService(BATTERY_LEVEL_SERVICE).getCharacteristic(BATTERY_LEVEL_INDICATOR);
@@ -285,36 +211,29 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
 
     public void setNotify(BluetoothGattCharacteristic characteristic) {
-        System.out.println("Setting notify on heart rate");
-                //Enable local notifications
+        // Enable local notifications
         mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-                //Enabled remote notifications
+        // Enable remote notifications
         BluetoothGattDescriptor desc = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
         desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        // Writes to descriptor on remote device to enable notification
         mBluetoothGatt.writeDescriptor(desc);
     }
 
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            //Connection established
-            if (status == BluetoothGatt.GATT_SUCCESS
-                    && newState == BluetoothProfile.STATE_CONNECTED) {
+            // Connection established
+            if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
                 System.out.println("Connected");
-                //Discover services
+                // Discover services
                 gatt.discoverServices();
 
-            } else if (status == BluetoothGatt.GATT_SUCCESS
-                    && newState == BluetoothProfile.STATE_DISCONNECTED) {
+            // Connection disconnected
+            } else if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_DISCONNECTED) {
+                // Handle a disconnect event
                 System.out.println("Disconnected");
-                //Handle a disconnect event
-
             }
-        }
-
-        private void readNextSensor(BluetoothGattCharacteristic characteristic) {
-            System.out.println("Read next sensor");
-            System.out.println("read charac: " + mBluetoothGatt.readCharacteristic(characteristic));
         }
 
         @Override
@@ -322,18 +241,21 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 //            System.out.println("Characteristic changed" + characteristic);
             if(HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
                 heartRateVal = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
-//                MyJavaNatives.sendHeartRate(heartRateVal);
             } else if(ECG_MEASUREMENT_CHARACTERISTIC.equals(characteristic.getUuid())) {
                 byte[] bytes;
+                // Turn the value from the characteristic to a byte array
                 bytes = characteristic.getValue();
-
+                // The timestamp is sixteen bits and has to be converted accordingly
                 glob_ecgDataArray[0] = getIntSixteen(bytes,0);
 
                 int offset = 2;
+                /* A loop that goes through all the samples and converts them to
+                 * integers of 24 bits of value */
                 for(int i = 1; i < glob_ecgDataArray.length; i++) {
                     glob_ecgDataArray[i] = getIntTwentyFour(bytes, offset);
                     offset += 3;
                 }
+                // This value is only relevant for the first notification
                 waitForData = false;
             } else {
                 System.out.println("Characteristic not found");
@@ -344,10 +266,10 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             System.out.println("Service discovered");
-            //Now we can start reading/writing characteristics
+            // Saves the available services in an array
             servicesList = getGattServices(gatt.getServices());
+            // This line makes it so the application can reach the servicesList
             doneConnecting = true;
-//            setNotifyNextSensor(gatt);
         }
 
         @Override
@@ -435,10 +357,7 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         mBluetoothGatt.readCharacteristic(characteristic);
     }
 
-    private static Handler mHandler = new Handler();
-    private static boolean scanning = true;
-
-    public static void /*String[]*/ scanLeDevices() {
+    public static void scanLeDevices() {
         if(m_instance.bluetoothAdapter.isEnabled()) {
             sendList = null;
             devices.clear();
@@ -450,7 +369,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
                     System.out.println("Stopping scan");
                     m_instance.bluetoothAdapter.stopLeScan(m_instance.mLeScanCallback);
                     scanning = false;
-                    nrOfDevices = 0;
                 }
             }, SCAN_PERIOD);
             System.out.println("Start scanning");
@@ -462,10 +380,6 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
     }
 
     public static String[] getDeviceList() {
-//        sendList = processScanResult(devicesFound);
-//        System.out.println("Send list: " + Arrays.toString(sendList));
-//        System.out.println("Enabled status: " + m_instance.bluetoothAdapter.isEnabled());
-
         sendList = devices.toArray(new String[devices.size()]);
         return sendList;
     }
@@ -474,48 +388,18 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         return scanning;
     }
 
-    private static String[] processScanResult(String[] foundDevices) {
-        String[] tempArray;
-        if(nrOfDevices > 0){
-            tempArray = new String[nrOfDevices];
-            for(int i=0;i<nrOfDevices;i++) {
-                tempArray[i] = foundDevices[i];
-            }
-        } else {
-            tempArray = new String[0];
-//            tempArray[0] = "No devices";
-        }
-        System.out.println("Devices list: " + Arrays.toString(foundDevices));
-//        nrOfDevices = 0;
-        deviceNumber = 0; //CHECK THIS LINE LATER FOR ERROR WHEN SCANNING
-        return tempArray;
-    }
-
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
 
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
             int length = 0;
-//            StringBuilder sb = new StringBuilder();
-//                    for(byte b : scanRecord) {
-//                        length++;
-//                        sb.append(String.format("%02X ", b));
-//                    }
 
             devices.add(device.getName());
             addresses.add(device.getAddress());
 
-            devicesFound[nrOfDevices] = device.getName();
-            devicesFoundAddresses[nrOfDevices] = device.getAddress();
-            deviceNumber++;
-            nrOfDevices++;
-
             System.out.println("Device name: " + device.getName());
             System.out.println("Device address: " + device.getAddress());
             System.out.println("Rssi: " + rssi);
-//            System.out.println("Length: " + length);
-//            System.out.println("String: " + sb.toString());
-//            System.out.println("Scan record: " + scanRecord);
         }
     };
 
@@ -537,35 +421,32 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
         }
     }
 
-    private static List<String> knownServices = new ArrayList<String>();
-
     private String[] getGattServices(List<BluetoothGattService> gattServices) {
         System.out.println(gattServices);
         String uuid = null;
         List<String> servicesAndCharacteristics = new ArrayList<String>();
 
+        // Loops through all services found on the remote device
         for (BluetoothGattService gattService : gattServices) {
+            // Converts the UUID to a string
             uuid = gattService.getUuid().toString();
-//            servicesAndCharacteristics.add("S");
+            // Add the UUID to the list
             servicesAndCharacteristics.add(uuid);
             System.out.println("Service uuid: " + uuid);
 
-//            String result = getServiceName(uuid);
-//            if(!result.equals("null")) {
-//                System.out.println("known service found: " + result);
-//                knownServices.add(result);
-//            }
-
-
             List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+            // Loops through all the characteristics of a service on the remote device
             for(BluetoothGattCharacteristic gattCharac : gattCharacteristics) {
+                // Converts the UUID to a string
                 uuid = gattCharac.getUuid().toString();
-//                servicesAndCharacteristics.add("C");
+                // Add the UUID to the list
                 servicesAndCharacteristics.add(uuid);
                 System.out.println("\t" + "Characteristic uuid: " + uuid);
+                // Check if the UUID is a known characteristic
                 String result = getServiceName(uuid);
                 if(!result.equals("null")) {
                     System.out.println("known characteristic found: " + result);
+                    // A known characteristic is found and added to the list of known services
                     m_instance.knownServices.add(result);
                 }
             }
@@ -573,14 +454,11 @@ public class NotificationClient extends org.qtproject.qt5.android.bindings.QtAct
 
         System.out.println("List: " + knownServices);
 
-//        String[] sendServices = new String[servicesAndCharacteristics.size()];
-//        sendServices = servicesAndCharacteristics.toArray(sendServices);
-
+        /* The list of all known characteristics is converted to an array
+         * and returned to the calling function */
         String[] sendKnown = new String[knownServices.size()];
         sendKnown = knownServices.toArray(sendKnown);
 
-
         return sendKnown;
     }
-
 }

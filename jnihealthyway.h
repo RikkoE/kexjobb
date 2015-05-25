@@ -18,21 +18,17 @@ public:
     void disconnectDataStream(QString characteristic);
     void turnBluetoothOff();
     void turnBluetoothOn();
-    void connectService(int serviceIndex);
-
     bool scanningStatus();
 
     QStringList listServices();
     QStringList listDevices();
-    QStringList getDeviceData(int serviceIndex);
-
-    int deviceDataExperiment(int serviceIndex);
 
     int getBatteryLevel();
     QString getManufacturerName();
     int *getEcgData();
 
 private:
+    // An array that contains the ECG timestamp and reading samples.
     int ecgData[7];
 
 };

@@ -162,31 +162,31 @@ Rectangle {
 
         Connections {
             target: generator
-            onExperimentYChanged: {
+            onEcgReadingChanged: {
                 graph.requestPaint();
             }
         }
 
         transform: Scale {
-            yScale: 4
+            yScale: 2
         }
 
         onPaint: {
             // Get drawing context
             var context = graph.getContext("2d");
 
-            if(generator.experiment > count*(parent.width-40)) {
+            if(generator.ecgTimeStamp > count*(parent.width-40)) {
                 context.clearRect(0, 0, graph.width, graph.height);
                 linex = 0;
                 count += 1;
             }
 
             context.beginPath();
-            context.lineWidth = 1;
+            context.lineWidth = 5;
             context.moveTo(linex, liney);
 
-            linex = generator.experiment - (count-1)*(parent.width-40);
-            liney = generator.experimentY;
+            linex = generator.ecgTimeStamp - (count-1)*(parent.width-40);
+            liney = generator.ecgReading;
 
             context.strokeStyle = "red"
             context.lineTo(linex, liney);
