@@ -6,6 +6,16 @@
 #include <QtAndroidExtras/QAndroidJniObject>
 #include <QAndroidJniEnvironment>
 
+///
+/// \brief The JNIHealthyWay class
+///
+/// This class contains the necessary functions to call the native Java
+/// methods. The class also converts the values from native Java to regular
+/// C++ data values.
+///
+/// @author Rickard Eriksson
+/// @author Sajjadali Hemani
+///
 class JNIHealthyWay
 {
 public:
@@ -19,9 +29,10 @@ public:
     void turnBluetoothOff();
     void turnBluetoothOn();
     bool scanningStatus();
+    bool newEcgDataAvailable();
 
     QStringList listServices();
-    QStringList listDevices();
+    QList<QStringList> listDevices();
 
     int getBatteryLevel();
     QString getManufacturerName();

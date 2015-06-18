@@ -7,115 +7,129 @@ import QtGraphicalEffects 1.0
 Rectangle {
     visible: true
 
-    gradient: Gradient { // This sets a vertical gradient fill
-        GradientStop { position: 1.0; color: "white" }
-        GradientStop { position: 0.5; color: "light blue" }
-        GradientStop { position: 0.0; color: "white" }
-    }
+    color: "#EEEEE9"
 
-    Text {
-        opacity: 0.2
-        font.pixelSize: 200
-        visible: true
-        id: backGroundLabel
-        anchors.centerIn: parent
-        text:"Healthyway"
-        color: "white"
-        smooth: true
-    }
-    DropShadow {
-        opacity: 0.2
-        anchors.fill: backGroundLabel
-        horizontalOffset: 0
-        verticalOffset: 20
-        fast: true
-        radius: 20.0
-        samples: 16
-        spread: 0.5
-        color: "#000000"
-        source: backGroundLabel
-    }
-
-    FastBlur {
-        transparentBorder: true
-        anchors.fill: backGroundLabel
-        source: backGroundLabel
-        radius: 64
-    }
-
+    // A rectangle representing the menu bar at the top of the app
     Rectangle {
-        id: disconnectButton
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        y: 20
-        width: parent.width-40
+        id: menuBar
+        width: parent.width
         height: parent.height*0.1
-        smooth: true
-        radius: 20
-        border {
-            color: "black"
-            width: 5
-        }
-        gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "white" }
-            GradientStop { position: 1.0; color: "gray"}
-        }
-        Text {
-            id: disconnectLabel
-            anchors.centerIn: parent
-            text: "Disconnect"
-        }
-        MouseArea{
-            id: disconnectMouseArea
-            anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-            onPressed: disconnectButton.scale = 0.7
-            onReleased: disconnectButton.scale = 1.0
-            onClicked: {
-                generator.disconnectDevice()
-                pageLoader.source = "main.qml"
+
+        color: "#02163C"
+
+        // A rectangle representing the button which disconnects from the remote device
+        Rectangle {
+            id: disconnectButton
+            anchors {
+                left: parent.left
+            }
+            width: parent.width*0.4
+            height: parent.height
+
+            color: "#02163C"
+
+            Text {
+                id: disconnectLabel
+                anchors.centerIn: parent
+                text: "Disconnect"
+                color: "white"
+            }
+            MouseArea{
+                id: disconnectMouseArea
+                anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
+                // Change color when the button is pressed
+                onPressed: disconnectButton.color = "gray"
+                onReleased: disconnectButton.color = "#02163C"
+                onClicked: {
+                    // Disconnects from the remote device
+                    generator.disconnectDevice()
+                    // Switch the screen to the main page
+                    pageLoader.source = "main.qml"
+                }
             }
         }
     }
 
-    ListView {
-        id: servicesList
-        model: generator.serviceList
+    // A rectangle representing the list of services on the remote device
+    Rectangle {
+        id: serviceList
         width: parent.width-40
         height: parent.height*0.6
-        clip: true
 
         anchors {
             left: parent.left;
-            top: disconnectButton.bottom;
+            top: menuBar.bottom;
             topMargin: 20;
             bottomMargin: 20;
             leftMargin: 20;
         }
-        spacing: 40
-        delegate: Rectangle  {
-            //                anchors.topMargin: 40
-            height: parent.parent.height*0.2
+
+        color: "white"
+        radius: 10
+
+        ListView {
+            id: servicesList
+            // Connects the list to the serviceList in HealthyWayFunctions
+            model: generator.serviceList
             width: parent.width
-            radius: 20
-            border {
-                color: "black"
-                width: 5
-            }
-            gradient: Gradient { // This sets a vertical gradient fill
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: "transparent"}
-            }
-            Text {
-                anchors.centerIn: parent
-                text: modelData
-            }
-            MouseArea {
-                id: characMouseArea
-                anchors.fill: parent
-                onClicked: {
-                    servicesList.currentIndex = index;
-                    generator.getCharacteristicData(servicesList.currentIndex);
-                    pageLoader.source = "dataPage.qml"
+            height: parent.height
+            // Each element in the list won't go outside the border of the list
+            clip: true
+
+            // Spacing between the items in the list
+            spacing: 20
+            // A style template for each item in the list
+            delegate: Rectangle  {
+                height: parent.parent.height*0.2
+                width: parent.width
+
+                Rectangle {
+                    id: bottomBorder
+                    width: parent.width
+                    height: 5
+
+                    anchors.bottom: parent.bottom
+
+                    RadialGradient {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "black" }
+                            GradientStop { position: 0.5; color: "transparent" }
+                        }
+                    }
+                }
+                Rectangle {
+                    id: topBorder
+                    width: parent.width
+                    height: 5
+
+                    anchors.top: parent.top
+
+                    RadialGradient {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "black" }
+                            GradientStop { position: 0.5; color: "transparent" }
+                        }
+                    }
+                }
+
+                Text {
+                    color: "black"
+                    anchors.centerIn: parent
+                    text: modelData
+                }
+                MouseArea {
+                    id: characMouseArea
+                    anchors.fill: parent
+                    onClicked: {
+                        // Picks out the index of the pressed service
+                        servicesList.currentIndex = index;
+                        // Sends the index to HealthyWayFunctions
+                        generator.getCharacteristicData(servicesList.currentIndex);
+                        // Switch the screen to the data page
+                        pageLoader.source = "dataPage.qml"
+                    }
                 }
             }
         }

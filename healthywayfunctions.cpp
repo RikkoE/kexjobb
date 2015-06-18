@@ -27,7 +27,7 @@ HealthyWayFunctions::HealthyWayFunctions(QObject *parent):QObject(parent)
 ///
 void HealthyWayFunctions::deviceClicked(const int &deviceIndex)
 {
-    QString chosenDevice = m_devices.at(deviceIndex);
+    QString chosenDevice = m_deviceAddresses.at(deviceIndex);
     qDebug() << "Chosen device: " << chosenDevice;
     java->connectDevice(chosenDevice);
 }
@@ -89,6 +89,14 @@ void HealthyWayFunctions::disconnectNotification()
 void HealthyWayFunctions::startDataThread()
 {
     dataThread->Stop = false;
+    if(chosenCharacteristic == "Battery level indicator") {
+        dataThread->sleepTimer = 1000;
+    } else if(chosenCharacteristic == "Manufacturer name") {
+        dataThread->sleepTimer = 1000;
+    } else {
+        dataThread->sleepTimer = 40;
+        java->getEcgData();
+    }
     dataThread->start();
 }
 
@@ -139,49 +147,66 @@ void HealthyWayFunctions::updateData()
     } else if(chosenCharacteristic == "ECG measurement") {
         qDebug() << "ECG chosen";
         int *ecgData;
-        ecgData = java->getEcgData();
-        int ecgTimeStamp = ecgData[0];
-        qDebug() << "ECG time stamp: " << ecgTimeStamp;
-        /* A variable that converts the timestamp into chunks to be
-         * used with the samples*/
-        int timeDivider = 10/6;
 
-        // Checks if the timestamp is the same as the timestamp before
-        if(ecgTimeStamp != glob_timeStamp) {
+        if(java->newEcgDataAvailable()) {
+            ecgData = java->getEcgData();
+            int ecgTimeStamp = ecgData[0];
+            qDebug() << "ECG time stamp: " << ecgTimeStamp;
+
+            // Sets the new reference timestamp.
+            glob_timeStamp = ecgTimeStamp;
+
+            /* A variable that converts the timestamp into chunks to be
+             * used with the samples*/
+            int timeDivider = 10/6;
+
             // Loops through all samples and sends them to the qml graph
             for(int i = 1; i < 7; i++) {
                 qDebug() << "sample in int: " << ecgData[i];
-                m_ecgReading = ecgData[i]/10000;
+                if(ecgData[i] < m_lowestEcgReading) {
+                    m_lowestEcgReading = ecgData[i];
+                }
+                m_ecgReading = (ecgData[i]-m_lowestEcgReading)/100;
                 m_ecgTimeStamp = ecgTimeStamp*10 + (i-1)*timeDivider;
                 emit ecgReadingChanged();
             }
-            // Sets the new reference timestamp.
-            glob_timeStamp = ecgTimeStamp;
+
+            // Updates the data label in the qml with the timestamp
+            m_bleData = QVariant::fromValue(ecgTimeStamp);
+
+            // Sends signal to the qml to let it know new data is available
+            emit bleDataChanged();
+            // Sends signal to the qml so it showa the ECG graph
+            emit showEcgCanvas();
         }
-
-        // Updates the data label in the qml with the timestamp
-        m_bleData = QVariant::fromValue(ecgTimeStamp);
-
-        // Sends signal to the qml to let it know new data is available
-        emit bleDataChanged();
-        // Sends signal to the qml so it showa the ECG graph
-        emit showEcgCanvas();
 
     } else {
         qDebug() << "CHARACTERISTIC NOT FOUND";
     }
 }
 
+///
+/// \brief Converts the value m_services
+/// \return the service list
+///
 QVariant HealthyWayFunctions::getServiceList()
 {
     return QVariant::fromValue(m_services);
 }
 
+///
+/// \brief Converts the value m_devices
+/// \return the list of devices
+///
 QVariant HealthyWayFunctions::getDeviceList()
 {
     return QVariant::fromValue(m_devices);
 }
 
+///
+/// \brief Converts the value m_bleData
+/// \return the data for the "Data: " label
+///
 QVariant HealthyWayFunctions::getBleData()
 {
     return QVariant::fromValue(m_bleData);
@@ -202,12 +227,18 @@ void HealthyWayFunctions::scanLeDevices()
     if(!scanning) {
         // Clear old list of devices
         m_devices.clear();
+        m_deviceAddresses.clear();
 
-        QStringList listOfDevices;
+        QStringList listOfDeviceNames;
+        QStringList listOfDeviceAddresses;
+        QList<QStringList> deviceInformation;
         // Fetch new list of devices
-        listOfDevices = java->listDevices();
+        deviceInformation = java->listDevices();
+        listOfDeviceAddresses = deviceInformation.at(0);
+        listOfDeviceNames = deviceInformation.at(1);
 
-        m_devices = listOfDevices;
+        m_devices = listOfDeviceNames;
+        m_deviceAddresses = listOfDeviceAddresses;
         // Send signal to the qml so it knows a new device list is available
         emit deviceListChanged();
         // Stop the scanThread

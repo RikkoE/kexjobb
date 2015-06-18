@@ -10,145 +10,47 @@ Rectangle {
     visible: true
     anchors.fill: parent
 
-    gradient: Gradient { // This sets a vertical gradient fill
-        GradientStop { position: 1.0; color: "white" }
-        GradientStop { position: 0.5; color: "light blue" }
-        GradientStop { position: 0.0; color: "white" }
-    }
+    color: "#EEEEE9"
 
-    Text {
-        opacity: 0.2
-        font.pixelSize: 200
-        visible: true
-        id: backGroundLabel
-        anchors.centerIn: parent
-        text:"Healthyway"
-        color: "white"
-        smooth: true
-    }
-    DropShadow {
-        opacity: 0.2
-        anchors.fill: backGroundLabel
-        horizontalOffset: 0
-        verticalOffset: 20
-        fast: true
-        radius: 20.0
-        samples: 16
-        spread: 0.5
-        color: "#000000"
-        source: backGroundLabel
-    }
-
-    FastBlur {
-        transparentBorder: true
-        anchors.fill: backGroundLabel
-        source: backGroundLabel
-        radius: 64
-    }
-
-    // This element displays a rectangle with a gradient and a border
+    // A rectangle representing the menu bar at the top of the app
     Rectangle {
-        id: onButton
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        y: 20
-        width: (parent.width-60)/2
+        id: menuBar
+        width: parent.width
         height: parent.height*0.1
-        smooth: true
-        radius: 20 // This gives rounded corners to the Rectangle
-        gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "grey" }
-            GradientStop { position: 1.0; color: "white" }
-        }
-        border {
-            color: "black"
-            width: 5
-        }
 
-        Text {
-            id: onLabel
-            anchors.centerIn: parent
-            text: "Bluetooth ON"
-        }
+        color: "#02163C"
 
-        MouseArea{
-            id: onMouseArea
-            anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-            onPressed: onButton.scale = 0.7
-            onReleased: onButton.scale = 1.0
-            onClicked: generator.onButtonClicked()
-        }
-    }
+        // A rectangle representing the button which scans for devices
+        Rectangle {
+            id: scanButton
+            anchors {
+                right: parent.right
+            }
+            width: parent.width*0.2
+            height: parent.height
+            color: "#02163C"
 
-    // This rectangle is a plain color with no border
-    Rectangle {
-        id: offButton
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        y: 20
-        width: (parent.width-60)/2
-        height: parent.height*0.1
-        radius: 20 // This gives rounded corners to the Rectangle
-        gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "grey" }
-            GradientStop { position: 1.0; color: "white" }
-        }
-        border {
-            color: "black"
-            width: 5
-        }
-
-        Text {
-            id: offLabel
-            anchors.centerIn: parent
-            text: "Bluetooth OFF"
-        }
-        MouseArea{
-            id: offMouseArea
-            anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-            //onClicked handles valid mouse button clicks
-            onPressed: offButton.scale = 0.7
-            onReleased: offButton.scale = 1.0
-            onClicked: generator.offButtonClicked()
-        }
-    }
-
-    Rectangle {
-        id: scanButton
-        anchors {
-            left: parent.left
-            leftMargin: 20;
-            top: offButton.bottom;
-            topMargin: 20;
-        }
-        width: parent.width-40
-        height: parent.height*0.1
-        radius: 20 // This gives rounded corners to the Rectangle
-        gradient: Gradient { // This sets a vertical gradient fill
-            GradientStop { position: 0.0; color: "grey" }
-            GradientStop { position: 1.0; color: "white" }
-        }
-        border {
-            color: "black"
-            width: 5
-        }
-        Text {
-            id: scanLabel
-            anchors.centerIn: parent
-            text: "Scan"
-        }
-        MouseArea{
-            id: scanMouseArea
-            anchors.fill: parent //anchor all sides of the mouse area to the rectangle's anchors
-            onPressed: scanButton.scale = 0.7
-            onReleased: scanButton.scale = 1.0
-            onClicked: {
-                //                loadingScreen.visible = true
-                generator.startScanThread();
+            Text {
+                id: scanLabel
+                anchors.centerIn: parent
+                text: "Scan"
+                color: "white"
+            }
+            MouseArea{
+                id: scanMouseArea
+                anchors.fill: parent
+                // Change color when the button is pressed
+                onPressed: scanButton.color = "gray"
+                onReleased: scanButton.color = "#02163C"
+                onClicked: {
+                    // Starts the scan thread in HealthyWayFunction
+                    generator.startScanThread();
+                }
             }
         }
     }
 
+    // Waits for signals when scanning starts and stops to disable or enable the buttons
     Connections {
         target: generator
 
@@ -156,68 +58,104 @@ Rectangle {
             loadingScreen.visible = true
             scanMouseArea.enabled = false
             blueList.enabled = false
-            offMouseArea.enabled = false
-            onMouseArea.enabled = false
         }
         onScanningStopped: {
             loadingScreen.visible = false
             scanMouseArea.enabled = true
             blueList.enabled = true
-            offMouseArea.enabled = true
-            onMouseArea.enabled = true
         }
     }
 
-    ListView {
-        id: blueList
-        model: generator.deviceList
+    // A rectangle representing the list of devices
+    Rectangle {
+        id: deviceList
         width: parent.width-40
         height: parent.height*0.6
-        clip: true
 
         anchors {
             left: parent.left;
-            top: scanButton.bottom;
+            top: menuBar.bottom;
             topMargin: 20;
             bottomMargin: 20;
             leftMargin: 20;
         }
 
-        spacing: 40
-        delegate: Rectangle  {
-            id: delegateRect
-            height: parent.parent.height*0.2
+        color: "white"
+        radius: 10
+
+        ListView {
+            id: blueList
+            // Connects the list to the deviceList in HealthyWayFunctions
+            model: generator.deviceList
             width: parent.width
+            height: parent.height
+            // Each element in the list won't go outside the border of the list
+            clip: true
 
-            radius: 20
-            border {
-                color: "black"
-                width: 5
-            }
-            gradient: Gradient { // This sets a vertical gradient fill
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: "transparent"}
-            }
-            anchors.topMargin: 40
+            // Spacing between the items in the list
+            spacing: 20
+            // A style template for each item in the list
+            delegate: Rectangle  {
+                id: delegateRect
+                height: parent.parent.height*0.2
+                width: parent.width
 
-            Text {
-                color: "black"
-                anchors.centerIn: parent
-                text: modelData
-            }
-            MouseArea {
-                id: bluetoothDevices
-                anchors.fill: parent
-                onClicked: {
-                    blueList.currentIndex = index;
-                    generator.deviceClicked(blueList.currentIndex);
-                    generator.listServices();
-                    pageLoader.source = "servicePage.qml"
+                Rectangle {
+                    id: bottomBorder
+                    width: parent.width
+                    height: 5
+
+                    anchors.bottom: parent.bottom
+
+                    RadialGradient {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "black" }
+                            GradientStop { position: 0.5; color: "transparent" }
+                        }
+                    }
+                }
+                Rectangle {
+                    id: topBorder
+                    width: parent.width
+                    height: 5
+
+                    anchors.top: parent.top
+
+                    RadialGradient {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "black" }
+                            GradientStop { position: 0.5; color: "transparent" }
+                        }
+                    }
+                }
+
+                Text {
+                    color: "black"
+                    anchors.centerIn: parent
+                    text: modelData
+                }
+                // Activates when a device in the list is chosen
+                MouseArea {
+                    id: bluetoothDevices
+                    anchors.fill: parent
+                    onClicked: {
+                        // Picks out the index of the pressed device
+                        blueList.currentIndex = index;
+                        // Sends the index to HealthyWayFunctions
+                        generator.deviceClicked(blueList.currentIndex);
+                        // Fetches the services of the device
+                        generator.listServices();
+                        // Switch the screen to the service page
+                        pageLoader.source = "servicePage.qml"
+                    }
                 }
             }
         }
     }
 
+    // A rectangle representing the loading screen for scanning
     Rectangle {
         id: loadingScreen
         anchors.fill: parent
@@ -228,7 +166,7 @@ Rectangle {
         Rectangle {
             id: loadingWindow
             anchors.centerIn: parent
-            color: "white"
+            color: "#EEEEE9"
             width: parent.width-120
             height: parent.height*0.2
             radius: 20
@@ -242,6 +180,7 @@ Rectangle {
                 font.pixelSize: 100
             }
 
+            // The indicator next to the text "Scanning"
             BusyIndicator {
                 id: busyIndication
                 anchors.verticalCenter: parent.verticalCenter
@@ -251,6 +190,7 @@ Rectangle {
         }
     }
 
+    // A loader that lets the QML switch screens by using "source"
     Loader {
         id: pageLoader
         anchors.fill: parent

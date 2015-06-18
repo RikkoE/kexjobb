@@ -25,12 +25,12 @@ JNIHealthyWay::~JNIHealthyWay()
 /// tries to connect to it by sending that name to
 /// the java function "connectDevice".
 ///
-/// \param deviceName takes the device name to connect too as a QString.
+/// \param deviceAddress takes the device address to connect too as a QString.
 ///
-void JNIHealthyWay::connectDevice(QString deviceName)
+void JNIHealthyWay::connectDevice(QString deviceAddress)
 {
     // Converts the QString to a QAndroidObject that can be converted to a jstring
-    QAndroidJniObject deviceString = QAndroidJniObject::fromString(deviceName);
+    QAndroidJniObject deviceString = QAndroidJniObject::fromString(deviceAddress);
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationClient",
                                               "connectDevice",
                                               "(Ljava/lang/String;)V",
@@ -121,6 +121,19 @@ bool JNIHealthyWay::scanningStatus()
     }
 }
 
+bool JNIHealthyWay::newEcgDataAvailable()
+{
+    jboolean newData = QAndroidJniObject::callStaticMethod<jboolean>("org/qtproject/example/notification/NotificationClient",
+                                                                     "newEcgDataAvailable");
+    /* A jboolean returns 0 for false and 1 for true,
+     * this converts it into regular true/false */
+    if(newData == 0) {
+       return false;
+    } else {
+       return true;
+    }
+}
+
 ///
 /// \brief
 /// A function that fetches the list of services discovered by
@@ -137,6 +150,8 @@ QStringList JNIHealthyWay::listServices()
     jstring string;
     const char *formatted;
 
+    /* Calls the method updateServices on the java side and
+     * expects a String array returning */
     QAndroidJniObject javaArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
                                                                               "updateServices",
                                                                               "()[Ljava/lang/String;");
@@ -147,7 +162,7 @@ QStringList JNIHealthyWay::listServices()
 
     /* Loop that converts all the elements in the jobjectArray
      * into QStrings and puts them in a QStringList*/
-    for (int i=0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         string = (jstring)env->GetObjectArrayElement(servicesFromJava, i);
         formatted = env->GetStringUTFChars(string, 0);
@@ -171,13 +186,18 @@ QStringList JNIHealthyWay::listServices()
 /// a QStringList with the processed result containing
 /// all the devices available in the area.
 ///
-QStringList JNIHealthyWay::listDevices()
+QList<QStringList> JNIHealthyWay::listDevices()
 {
-    QStringList listOfDevices;
+    QStringList listOfDeviceNames;
+    QStringList listOfDeviceAddresses;
+    QList<QStringList> sendToCaller;
     QAndroidJniEnvironment env;
     jstring string;
     const char *formatted;
 
+
+    /* Calls the method updateServices on the java side and
+     * expects a String array returning */
     QAndroidJniObject stringArray = QAndroidJniObject::callStaticObjectMethod("org/qtproject/example/notification/NotificationClient",
                                                                               "getDeviceList",
                                                                               "()[Ljava/lang/String;");
@@ -188,19 +208,26 @@ QStringList JNIHealthyWay::listDevices()
 
     /* Loop that converts all the elements in the jobjectArray
      * into QStrings and puts them in a QStringList*/
-    for (int i=0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         string = (jstring)env->GetObjectArrayElement(arr, i);
         formatted = env->GetStringUTFChars(string, 0);
-        // Puts the QString in the QStringList
-        listOfDevices.append(formatted);
+        // Puts the QString in the QStringList        
+        if(i % 2 == 0) {
+            listOfDeviceAddresses.append(formatted);
+        } else {
+            listOfDeviceNames.append(formatted);
+        }
         /* These two lines releases the variables from the memory
          * to prevent unnecessary usage of memory*/
         env->ReleaseStringUTFChars(string, formatted);
         env->DeleteLocalRef(string);
     }
 
-    return listOfDevices;
+    sendToCaller.append(listOfDeviceAddresses);
+    sendToCaller.append(listOfDeviceNames);
+
+    return sendToCaller;
 }
 
 ///
@@ -214,8 +241,9 @@ int JNIHealthyWay::getBatteryLevel()
 {
     int batteryLevel;
 
+    // Calls
     jint javaBatt = QAndroidJniObject::callStaticMethod<jint>("org/qtproject/example/notification/NotificationClient",
-                                                       "batteryLevel");
+                                                              "batteryLevel");
     // Converts the jint into a regular int
     batteryLevel = (int) javaBatt;
 
